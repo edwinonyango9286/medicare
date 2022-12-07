@@ -18,7 +18,7 @@ function Home(){
         }
     `;
 
-    const LoadAllLocations = () => request("http://192.168.48.206:8000/api",GetAllLocations);
+    const LoadAllLocations = () => backend.request(GetAllLocations);
 
     const {data,error,isLoading,isSuccess} = useQuery("AllLocations",LoadAllLocations);
 
@@ -38,7 +38,7 @@ function Home(){
                             //     {location.constituencyCode}
                             //     {location.constituencyName}
                             // </div>
-                            <option value={location.constituencyCode}>{location.constituencyName}</option>
+                            <option key={index} value={location.constituencyCode}>{location.constituencyName}</option>
                         ))}
                     </select>
                 )}

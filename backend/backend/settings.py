@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-=&1sq!e+7gpki59*t&eyjd@fh837est_sv@eeztm9%2e+f=yyd
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.48.206"]
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -103,8 +103,6 @@ AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
-CORS_ALLOW_ALL_ORIGINS=True
-#CORS_ORIGIN_WHITELIST = [
-#    "http://localhost:5173",
-#    "http://192.168.48.206:5173",
-#]
+CORS_ORIGIN_WHITELIST = [
+   "http://localhost:5173",
+]
