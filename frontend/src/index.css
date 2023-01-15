@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+    .medicare-nav-link{
+        @apply bg-transparent transition-all ease-in-out duration-300 hover:-translate-y-1 hover:scale-110 hover:text-white
+    }
+    .medicare-action-button{
+        @apply mx-2 transition-all duration-300 hover:bg-gradient-to-tr hover:-translate-y-1 hover:translate-x-1 hover:scale-105 bg-gradient-to-bl from-violet-700 to-sky-600 p-3 rounded shadow-xl
+    }
+}

@@ -1,47 +1,50 @@
-import graphene
 from graphene_django import DjangoObjectType
-from user.models import User,Location
-from django.db.models import Count
-import graphql_jwt
+from user.models import Proffesion,HospitalStaff,Appointment,PatientRecord,Prescription,InPatient,OutPatient,OutPatientReport
+from django.contrib.auth import get_user_model
 
-class LocationType(DjangoObjectType):
-    class Meta:
-        model = Location
-        fields = ("county_code", "county_name", "constituency_code", "constituency_name")
+MedicareUser = get_user_model()
 
 class UserType(DjangoObjectType):
     class Meta:
-        model = User
-        fields = ("first_name", "last_name", "phone_number", "location", "email", "is_staff")
+        model = MedicareUser
+        fields = ("id","firstName","lastName","email", "phoneNumber","dateOfBirth","gender","image","location","nationalId","is_staff","is_superuser")
 
-class Query(graphene.ObjectType):
-    all_locations = graphene.List(LocationType)
-    all_counties = graphene.List(LocationType)
-    locations_by_county = graphene.List(LocationType, county_code=graphene.String(required=True))
-    user_data = graphene.Field(UserType, user_id=graphene.String(required=True))
+class ProffesionType(DjangoObjectType):
+    class Meta:
+        model = Proffesion
+        fields = ("id","type","description")
 
-    def resolve_all_locations(root, info):
-        return Location.objects.all()
+class HospitalStaffType(DjangoObjectType):
+    class Meta:
+        model = HospitalStaff
+        fields = ("hospital","staff","proffesion")
 
-    def resolve_all_counties(root,info):
-        return Location.objects.values('county_code','county_name').annotate(count=Count('county_code')).order_by()
+class AppointmentType(DjangoObjectType):
+    class Meta:
+        model = Appointment
+        fields = ("patient", "doctor","hospital","created_at","is_active")
 
-    def resolve_locations_by_county(root, info, county_code):
-        return Location.objects.filter(county_code=county_code)
+class PatientRecordType(DjangoObjectType):
+    class Meta:
+        model = PatientRecord
+        fields = ("doctor","patient","hospital","diagnosis","created_at")
 
-    def resolve_user_data(root,info,user_id):
-        user = info.context.user
-        if not user.is_authenticated:
-            raise Exception("Authentication credentials were not provided")
-        else:
-            try:
-                return User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                return None
+class PrescriptionType(DjangoObjectType):
+    class Meta:
+        model = Prescription
+        fields = ("appointment","prescription","created_at")
 
-class Mutation(graphene.ObjectType):
-    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
-    refresh_token = graphql_jwt.Refresh.Field()
+class InPatientType(DjangoObjectType):
+    class Meta:
+        model = InPatient
+        fields = ("patient","ward","admitted_at")
 
-schema = graphene.Schema(query=Query,mutation=Mutation)
+class OutPatientType(DjangoObjectType):
+    class Meta:
+        model = OutPatient
+        fields = ("patient","admitted_at")
+
+class OutPatientReportType(DjangoObjectType):
+    class Meta:
+        model = OutPatientReport
+        fields = ("patient","report","recorded_at")

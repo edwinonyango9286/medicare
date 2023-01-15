@@ -18,7 +18,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'graphene_django',
+    'channels',
+    'chat',
     'user',
+    'location',
+    'hospital',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +55,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+ASGI_APPLICATION = 'chat.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layer.InMemoryChannelLayer"
+    }
+}
 
 DATABASES = {
     'default': {
