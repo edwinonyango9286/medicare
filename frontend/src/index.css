@@ -9,4 +9,13 @@
     .medicare-action-button{
         @apply mx-2 transition-all duration-300 hover:bg-gradient-to-tr hover:-translate-y-1 hover:translate-x-1 hover:scale-105 bg-gradient-to-bl from-violet-700 to-sky-600 p-3 rounded shadow-xl
     }
+    .medicare-dashboard-link{
+        @apply w-full py-2 pl-5 flex flex-row  text-white hover:bg-gradient-to-l from-violet-700 to-sky-500
+    }
+    .medicare-dashboard-link-icon{
+        @apply w-6 h-6 mr-3 to-sky-700
+    }
+}
+.test{
+    font-weight: 600;
 }

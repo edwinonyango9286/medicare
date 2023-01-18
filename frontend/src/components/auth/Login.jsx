@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useMutation } from "react-query";
-import request, {gql} from 'graphql-request';
+import request, { gql } from 'graphql-request';
 import { Link, useNavigate } from 'react-router-dom'
 import Base from '../Base'
 import { API_URL } from '../../backend'
-import {setCookie} from 'typescript-cookie'
+import Cookies from 'js-cookie'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'
 import { IsAuthenticated } from '../../libs/user';
 
@@ -41,7 +41,7 @@ function Login(){
         SignInMutation,
     ),{
         onSuccess: (data) => {
-            setCookie('session_id',data.tokenAuth.token)
+            Cookies.set('session_id',data.tokenAuth.token)
             window.location.reload()
             navigate('/')
         },onError(error, variables, context) {

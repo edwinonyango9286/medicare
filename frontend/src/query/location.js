@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import { GraphQLClient, gql } from "graphql-request";
 import { backend } from '../backend';
-import { getCookie } from "typescript-cookie";
+import Cookies from "js-cookie";
 
 export function useGetCounties() {
   return useQuery("all-counties", async () => {
@@ -39,7 +39,7 @@ export function useGetCountySubcounties() {
   return useQuery("countySubcounties", async () => {
     const getLocationList = await backend.request(gql`
       query {
-        countySubcounties(countyCode:"${getCookie('usercounty')}") {
+        countySubcounties(countyCode:"${Cookies.get('usercounty')}") {
           subcountyCode
           subcountyName
           county{

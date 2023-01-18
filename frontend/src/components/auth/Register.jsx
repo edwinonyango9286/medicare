@@ -4,7 +4,7 @@ import request, {gql} from 'graphql-request';
 import { Link, useNavigate, useNavigation } from 'react-router-dom'
 import Base from '../Base'
 import { API_URL } from '../../backend'
-import {setCookie} from 'typescript-cookie'
+import Cookies from 'js-cookie'
 import { StoreContext } from '../../store/store';
 import { IsAuthenticated } from '../../libs/user';
 import { useGetCounties, useGetCountySubcounties } from '../../query/location';
@@ -25,7 +25,7 @@ function Register(){
         setPage(currentPage-1)
     }
 
-    setCookie('usercounty',1)
+    Cookies.set('usercounty',1)
 
     const [data,setData] = React.useState({
         email:"",
@@ -51,7 +51,7 @@ function Register(){
     const UpdateData = (name) => (event) =>{
         setData({...data,[name]:event.target.value})
         if(name==="county"){
-            setCookie('usercounty',event.target.value)
+            Cookies.set('usercounty',event.target.value)
             queryClient.invalidateQueries('countySubcounties')
         }
     } 

@@ -8,7 +8,6 @@ class Hospital(models.Model):
 
     def __str__(self):
         return self.name
-admin.site.register(Hospital)
 
 class Ward(models.Model):
     hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
@@ -19,4 +18,3 @@ class Ward(models.Model):
 
     def __str__(self):
         return f"{self.hospital} -> {self.name}"
-admin.site.register(Ward)

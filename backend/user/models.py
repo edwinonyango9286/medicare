@@ -5,6 +5,7 @@ from hospital.models import Hospital,Ward
 from slugify import slugify
 from django.contrib import admin
 import os
+from django.utils.safestring import mark_safe
 
 class UserManager(BaseUserManager):
     def create_superuser(self,email,password,nationalId,phoneNumber):
@@ -41,8 +42,8 @@ class User(AbstractBaseUser,PermissionsMixin):
     image = models.ImageField(upload_to=upload_profileImage,blank=True,null=True)
     hospitalStaff = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    dateCreated = models.DateTimeField(auto_now_add=True)
-    dateUpdated = models.DateTimeField(auto_now=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
 
@@ -52,79 +53,118 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def __str__(self) -> str:
         return self.email
-admin.site.register(User)
+    
+    def  image_tag(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.image))
+
+
+    image_tag.allow_tags = True
 
 class Proffesion(models.Model):
     type = models.CharField(max_length=20)
     description = models.TextField(null=True,blank=True)
+    
+    class Meta:
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return self.type
-admin.site.register(Proffesion)
 
 class HospitalStaff(models.Model):
     staff = models.OneToOneField(User,on_delete=models.CASCADE)
     hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
     proffesion = models.ForeignKey(Proffesion,on_delete=models.SET_NULL,null=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
     
     def __str__(self) -> str:
         return "{}->{}->{}".format(self.staff, self.proffesion, self.hospital)
-admin.site.register(HospitalStaff)
+    
+    def  image_tag(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.staff.image))
 
 class Appointment(models.Model):
     patient =  models.ForeignKey(User, on_delete=models.CASCADE)
     doctor =  models.ForeignKey(HospitalStaff, on_delete=models.CASCADE)
     hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
     isActive = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return "{}->{}".format(self.patient,self.doctor)
-admin.site.register(Appointment)
+    
+    def patient_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.patient.image))
+    
+    def doctor_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.doctor.staff.image))
 
-class PatientRecord(models.Model):
+class Diagnosis(models.Model):
     doctor =  models.ForeignKey(HospitalStaff,related_name="doctor",on_delete=models.CASCADE)
     patient =  models.ForeignKey(User, related_name="patient",on_delete=models.CASCADE)
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
     hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
     diagnosis = models.TextField()
     createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return "{}->{}".format(self.patient,self.doctor)
-admin.site.register(PatientRecord)
+    
+    def patient_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.patient.image))
+    
+    def doctor_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.doctor.staff.image))
 
 class Prescription(models.Model):
-    appointment = models.ForeignKey(Appointment,on_delete=models.CASCADE)
+    diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     prescription = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    isActive = models.BooleanField(default=True) 
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.appointment
-admin.site.register(Prescription)
+        return f"{self.diagnosis.patient} -> {self.prescription}"
+    
+    def patient_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.diagnosis.patient.image))
+    
+    def doctor_image(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.diagnosis.doctor.staff.image))
 
 class InPatient(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
     ward = models.ForeignKey(Ward,on_delete=models.CASCADE)
     isActive = models.BooleanField(default=True) 
-    admittedAt = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return str(self.patient)
-admin.site.register(InPatient)
+    
+    def  image_tag(self):
+        return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.patient.image))
 
-class OutPatient(models.Model):
-    patient = models.ForeignKey(User, on_delete=models.CASCADE)
-    admittedAt = models.DateTimeField(auto_now_add=True)
+class InPatientReport(models.Model):
+    patient = models.ForeignKey(InPatient,on_delete=models.CASCADE)
+    doctor = models.ForeignKey(HospitalStaff, on_delete=models.CASCADE)
+    report = models.TextField()
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.patient
-admin.site.register(OutPatient)
+
+class OutPatient(models.Model):
+    patient = models.ForeignKey(User, on_delete=models.CASCADE)
+    createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.patient
 
 class OutPatientReport(models.Model):
     patient = models.ForeignKey(OutPatient,on_delete=models.CASCADE)
     report = models.TextField()
-    recordedAt = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.patient
-admin.site.register(OutPatientReport)

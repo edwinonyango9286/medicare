@@ -1,5 +1,5 @@
 from graphene_django import DjangoObjectType
-from user.models import Proffesion,HospitalStaff,Appointment,PatientRecord,Prescription,InPatient,OutPatient,OutPatientReport
+from user.models import Proffesion,HospitalStaff,Appointment,Diagnosis,Prescription,InPatient,OutPatient,OutPatientReport
 from django.contrib.auth import get_user_model
 
 MedicareUser = get_user_model()
@@ -22,29 +22,29 @@ class HospitalStaffType(DjangoObjectType):
 class AppointmentType(DjangoObjectType):
     class Meta:
         model = Appointment
-        fields = ("patient", "doctor","hospital","created_at","is_active")
+        fields = ("patient", "doctor","hospital","createdAt","isActive")
 
-class PatientRecordType(DjangoObjectType):
+class DiagnosisType(DjangoObjectType):
     class Meta:
-        model = PatientRecord
-        fields = ("doctor","patient","hospital","diagnosis","created_at")
+        model = Diagnosis
+        fields = ("doctor","patient","appointment","hospital","diagnosis","createdAt")
 
 class PrescriptionType(DjangoObjectType):
     class Meta:
         model = Prescription
-        fields = ("appointment","prescription","created_at")
+        fields = ("diagnosis","prescription","createdAt")
 
 class InPatientType(DjangoObjectType):
     class Meta:
         model = InPatient
-        fields = ("patient","ward","admitted_at")
+        fields = ("patient","ward","admittedAt")
 
 class OutPatientType(DjangoObjectType):
     class Meta:
         model = OutPatient
-        fields = ("patient","admitted_at")
+        fields = ("patient","admittedAt")
 
 class OutPatientReportType(DjangoObjectType):
     class Meta:
         model = OutPatientReport
-        fields = ("patient","report","recorded_at")
+        fields = ("patient","report","recordedAt")
