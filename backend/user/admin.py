@@ -1,14 +1,76 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from datetime import datetime
 from django.utils.html import format_html
-from user.models import User,Proffesion,HospitalStaff,Appointment,Prescription,Diagnosis,InPatient,OutPatient,OutPatientReport
+from user.models import User,Proffesion,HospitalStaff,Appointment,Prescription,Diagnosis,InPatient,InPatientReport,OutPatient,OutPatientReport
 from django.views.generic.detail import DetailView
 from django.urls import path, reverse
-
-# admin.site.unregister(Group)
+from user.forms import AddDiagnosisForm
+from django.shortcuts import redirect
+from django.db.models import Q, F
+from hospital.models import Hospital, Ward
+from django.contrib.admin.models import LogEntry
+from django.utils.translation import gettext_lazy
 
 current_date = datetime.now().date()
+
+def get_edit_text(issuper : bool) -> str:
+    if issuper:
+        return "edit"
+    
+    else:
+        return "view"
+    
+class ActionUserFilter(admin.SimpleListFilter):
+    title = gettext_lazy('action user')
+    
+    parameter_name = 'user'
+    
+    def lookups(self, request, model_admin):
+        fields = []
+        for user in User.objects.filter(is_staff=True):
+            fields.append((user.id,user.email))
+            
+        return fields
+    
+    def queryset(self, request, queryset):
+        return queryset.filter(user__id=self.value())
+    
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ("action_time","model_changed","object_changed","changed_fields","changed_by")
+    list_filter = ("content_type__model","action_time",ActionUserFilter)
+    list_per_page = 20
+    
+    def model_changed(self, obj):
+        return f"{obj.content_type.app_label} -> {obj.content_type.model}"
+    
+    def changed_fields(self, obj):
+        return obj.change_message
+    
+    def changed_by(self,obj):
+        return obj.user.email
+    
+    def object_changed(self,obj):
+        return obj.object_repr
+    
+
+
+class CurrentUserMixin(object):
+    def changelist_view(self, request, extra_content=None):
+        setattr(self, 'authMedicareUser', request.user)
+        return super().changelist_view(request, extra_content)
+    
+class ViewUserActions(DetailView):
+    template_name = "admin/user/user/UserActions.html"
+    model = User
+    
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            **admin.site.each_context(self.request),
+            "opts" : self.model._meta
+        }
+    
 
 class ViewUser(DetailView):
     template_name = "admin/user/user/ViewUser.html"
@@ -22,25 +84,59 @@ class ViewUser(DetailView):
         }
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ("image_tag","name","email","gender","age","phone_number","action_links")
+class UserAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("image_tag","name","email","gender","age","phone_number","county","location","action_links")
     search_fields = ("firstName__startswith","lastName__startswith")
+    list_filter = ("location__county","location","dateOfBirth")
     
-    def get_queryset(self, request):
-        if request.user.is_superuser:
-            return super().get_queryset(request)
+    def get_form(self, request, obj, **kwargs):
+        exclude_fields = ['password','image']
+        if obj:
+            if obj.id != request.user.id:
+                exclude_fields += ['nationalId']
+                if not self.authMedicareUser.is_admin:
+                    exclude_fields += ['is_staff','is_superuser','last_login']
+                    pass
+            
+        self.exclude = exclude_fields
+        return super(UserAdmin, self).get_form(request, obj, **kwargs)
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        user_pk = ""
+        user_pk+=object_id
+        try:
+            user_pk = user_pk[0:user_pk.index("/")]
+        
+        except:
+            pass
+        
+        extra_context = extra_context or {}
+        if User.objects.get(id=user_pk).image:
+            extra_context['medicareimageurl'] = User.objects.get(id=user_pk).image.url
+        return super().change_view(request, object_id, form_url, extra_context)
+            
+    def county(self, obj):
+        if obj.location:
+            return obj.location.county.countyName
         
         else:
-            return super().get_queryset(request).filter(id=request.user.id)
+            return "_"
     
     def age(self, obj):
-        return (current_date - obj.dateOfBirth).days // 365
+        if obj.dateOfBirth:
+            return (current_date - obj.dateOfBirth).days // 365
+        else:
+            return 0
     
     def phone_number(self,obj):
         return obj.phoneNumber
     
     def name(self,obj):
-        return f"{obj.firstName} {obj.lastName}"
+        if obj.firstName or obj.lastName:
+            return f"{obj.firstName} {obj.lastName}"
+    
+        else:
+            return "_"
     
     def action_links(self, obj):
         url = "/admin/user/user/"
@@ -48,9 +144,7 @@ class UserAdmin(admin.ModelAdmin):
         return format_html(
             f'''
                 <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{view_url}">view</a>
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
+                    <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
                 </div>
             '''
         )
@@ -62,27 +156,31 @@ class UserAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(ViewUser.as_view()),
                 name=f"view_user_details"
             ),
+            path(
+                "<pk>/actions",
+                self.admin_site.admin_view(ViewUserActions.as_view()),
+                name=f"view_user_actions"
+            ),
             *super().get_urls(),
         ]
 
 @admin.register(Proffesion)
-class ProffesionAdmin(admin.ModelAdmin):
-    list_display = ("id","type","action_links")
+class ProffesionAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("id","type","group","action_links")
     
     def action_links(self, obj):
         url = "/admin/user/proffesion/"
         return format_html(
             f'''
                 <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
+                    <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
                 </div>
             '''
         )
 
 @admin.register(HospitalStaff)
-class HospitalStaffAdmin(admin.ModelAdmin):
-    list_display = ("name","email","hospital","role","action_links")
+class HospitalStaffAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("id","name","email","hospital","role","action_links")
     list_filter = ("hospital","proffesion")
     # search_fields = ("hospital__startswith",)
     
@@ -100,8 +198,7 @@ class HospitalStaffAdmin(admin.ModelAdmin):
         return format_html(
             f'''
                 <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
+                    <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
                 </div>
             '''
         )
@@ -113,20 +210,24 @@ class HospitalStaffAdmin(admin.ModelAdmin):
                 return super().get_queryset(request).filter(hospital__id=authAdmin.hospital.id)
             
             except HospitalStaff.DoesNotExist:
-                if request.user.is_superuser:
+                if self.authMedicareUser.is_admin:
                     return super().get_queryset(request)
                 
                 else:
                     return  super().get_queryset(request=request).filter(id=None)
 
 @admin.register(Appointment)
-class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ("id","doctor_image","doctor_name","patient_image","patient_name","hospital","createdAt","action_links")
+class AppointmentAdmin(CurrentUserMixin,admin.ModelAdmin):
+    list_display = ("id","doctor_image","doctor_name","patient_image","patient_name","hospital","createdAt","isActive","action_links")
+    list_filter = ("doctor","doctor__hospital","patient__location__county","patient__location")
+    
+    def user_view_url(self,user_id):
+        return reverse("admin:user_user_change",args=[user_id])
     
     def doctor_name(self, obj):
         view_url = reverse("admin:view_user_details",args=[obj.doctor.staff.id])
         return format_html(
-            f"""<a href="{view_url}">
+            f"""<a href="{self.user_view_url(obj.doctor.staff.id)}">
             {obj.doctor.staff.firstName.upper()} {obj.doctor.staff.lastName.upper()}
             </a>"""
         )
@@ -139,21 +240,69 @@ class AppointmentAdmin(admin.ModelAdmin):
             </a>"""
         ) 
     
-    def action_links(self, obj):
+    def action_links(self,obj):
         url = "/admin/user/appointment/"
-        return format_html(
-            f'''
-                <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
-                </div>
-            '''
-        )
+        addDiagnosisUrl = reverse("admin:add_patient_diagnosis",args=[obj.id])
+        if self.authMedicareUser.is_admin:
+            return format_html(
+                f'''
+                    <div style="display:flex;flex-direction:row;">
+                        <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
+                    </div>
+                '''
+            )
+        
+        else:
+            if obj.isActive:
+                return format_html(
+                    f'''
+                        <div style="display:flex;flex-direction:row;">
+                            <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
+                        </div>
+                        <div style="display:flex;flex-direction:row;margin-top:1em;">
+                            <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{addDiagnosisUrl}">
+                                Make Diagnosis
+                            </a>
+                        </div>
+                    '''
+                )
+            
+            else:
+                return format_html(
+                    f'''
+                        <div style="display:flex;flex-direction:row;">
+                            <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
+                        </div>
+                    '''
+                )
+            
+        
+    def get_queryset(self, request):
+        if self.authMedicareUser.is_admin:
+            return super().get_queryset(request)
+        
+        else:
+            try:
+                authAdmin = HospitalStaff.objects.get(staff__id=request.user.id)
+                return super().get_queryset(request=request).filter(doctor__id=authAdmin.id)
+            
+            except HospitalStaff.DoesNotExist:
+                return super().get_queryset(request).filter(id=0)
+            
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "doctor":
+            kwargs['queryset'] = HospitalStaff.objects.filter(staff__id=request.user.id)
+            
+        elif db_field.name == "patient":
+            kwargs['queryset'] = User.objects.filter(~Q(id=request.user.id))
+            
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 @admin.register(Prescription)
-class PrescriptionAdmin(admin.ModelAdmin):
+class PrescriptionAdmin(CurrentUserMixin, admin.ModelAdmin):
     list_display = ("id","doctor_image","doctor_name","patient_image","patient_name","prescription","isActive","createdAt")
     list_editable = ("isActive",)
+    list_filter = ("diagnosis__doctor","diagnosis__patient")
     
     def doctor_name(self, obj):
         view_url = reverse("admin:view_user_details",args=[obj.diagnosis.doctor.staff.id])
@@ -170,11 +319,49 @@ class PrescriptionAdmin(admin.ModelAdmin):
             {obj.diagnosis.patient.firstName.upper()} {obj.diagnosis.patient.lastName.upper()}
             </a>"""
         )    
+                
+class AddDiagnosis(DetailView):
+    template_name = "admin/user/appointment/AddDiagnosis.html"
+    model = Appointment
+    
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            **admin.site.each_context(self.request),
+            "opts" : self.model._meta
+        }
+        
+    def post(self, request,*args,**kwargs):
+        url = reverse("admin:user_diagnosis_changelist")
+        print(url)
+        form = AddDiagnosisForm(data=request.POST)
+        self.object = self.get_object()
+        context = self.get_context_data(**kwargs)
+        if form.is_valid():
+            context['form'] = AddDiagnosisForm
+            Appointment.objects.filter(id=form.data['appointment']).update(isActive=False)
+            form.save()
+            return redirect(url)
+            
+        else:
+            context['form'] = form
+        return self.render_to_response(context=context)
 
 @admin.register(Diagnosis)
-class DiagnosisAdmin(admin.ModelAdmin):
-    list_display = ("id","doctor_image","doctor_name","patient_image","patient_name","hospital","diagnosis","createdAt","action_links")
+class DiagnosisAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("id","doctor_image","doctor_name","patient_image","patient_name","diagnosis","createdAt","action_links")
     
+        
+    def get_urls(self):
+        return [
+            path(
+                "<pk>/add-diagnosis",
+                self.admin_site.admin_view(AddDiagnosis.as_view()),
+                name=f"add_patient_diagnosis"
+            ),
+            *super().get_urls(),
+        ]
+        
     def doctor_name(self, obj):
         view_url = reverse("admin:view_user_details",args=[obj.doctor.staff.id])
         return format_html(
@@ -196,32 +383,83 @@ class DiagnosisAdmin(admin.ModelAdmin):
         return format_html(
             f'''
                 <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
+                    <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
                 </div>
             '''
         )
         
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if self.authMedicareUser.is_admin:
             return super().get_queryset(request=request)
         
         else:
             try:
                 authAdmin = HospitalStaff.objects.get(staff__id=request.user.id)
-                return super().get_queryset(request=request).filter(doctor=authAdmin.id)
+                return super().get_queryset(request=request).filter(doctor__id=authAdmin.id)
             
             except HospitalStaff.DoesNotExist:
                 return  super().get_queryset(request=request).filter(id=None)
 
+class DischargePatient(DetailView):
+    template_name = "admin/user/inpatient/DischargePatient.html"
+    model = InPatient
+    test = 1
+    inpatient_url = "/admin/user/inpatient"
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            testpatient = InPatient.objects.get(id=kwargs['pk'])
+            if not testpatient.isActive:
+                return redirect(self.inpatient_url)
+            
+        except InPatient.DoesNotExist:
+            return redirect(self.inpatient_url)
+        
+        return super().get(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            **admin.site.each_context(self.request),
+            "opts" : self.model._meta
+        }
+        
+    def post(self, request, pk):
+        inpatient = InPatient.objects.get(id=pk)
+        Ward.objects.filter(id=inpatient.ward.id).update(occupancy=F('occupancy')-1)
+        InPatient.objects.filter(id=pk).update(isActive=False,dischargedBy=HospitalStaff.objects.get(staff__id=request.user.id),dischargedOn=datetime.now())
+        
+        return redirect(self.inpatient_url)
+
 @admin.register(InPatient)
-class InPatientAdmin(admin.ModelAdmin):
-    list_display = ("image_tag","id","patient_name","hospital","ward_no","admitted_on","isActive","action_links")
-    list_filter = ("ward",)
-    list_editable = ("isActive",)
+class InPatientAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("image_tag","id","patient_name","hospital","ward_no","createdAt","isActive","discharged_by","dischargedOn","action_links")
+    list_filter = ("ward","ward__hospital","patient__location__county","patient__location")
+    
+    def discharged_by(self, obj):
+        if obj.dischargedBy != None:
+            viewdoctorurl = reverse("admin:view_user_details",args=[obj.dischargedBy.staff.id])
+            return format_html(
+                f"""
+                    <a style="color:navy;" href={viewdoctorurl}>
+                        {obj.dischargedBy.staff.firstName} {obj.dischargedBy.staff.lastName} <br />
+                        {obj.dischargedBy.staff.email}
+                    </a>
+                """
+            )
+        
+    def get_urls(self):
+        return [
+            path(
+                "<pk>/discharge-patient",
+                self.admin_site.admin_view(DischargePatient.as_view()),
+                name=f"discharge_patient"
+            ),
+            *super().get_urls(),
+        ]
     
     def get_queryset(self, request):
-        if request.user.is_superuser:
+        if self.authMedicareUser.is_admin:
             return super().get_queryset(request)
         
         else:
@@ -232,33 +470,77 @@ class InPatientAdmin(admin.ModelAdmin):
             except HospitalStaff.DoesNotExist:
                 return super().get_queryset(request=request).filter(id=None)
     
+    def action_links(self, obj):
+        url = "/admin/user/inpatient/"
+        dischargePatientUrl = reverse("admin:discharge_patient",args=[obj.id])
+        
+        if obj.isActive:
+            return format_html(
+                f'''
+                    <div style="display:flex;flex-direction:row;">
+                        <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
+                    </div>
+                    <div style="display:flex;flex-direction:row;margin-top:1em;">
+                        <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{dischargePatientUrl}">
+                            Discharge
+                        </a>
+                    </div>
+                '''
+            )
+            
+        else:
+            return format_html(
+                f'''
+                    <div style="display:flex;flex-direction:row;">
+                        <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
+                    </div>
+                '''
+            )
+        
+@admin.register(InPatientReport)
+class InPatientReportAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("id","patient","createdAt")
+    list_filter = ("doctor","patient__patient__location__county","patient__patient__location")
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        authAdmin = HospitalStaff.objects.get(staff__id=request.user.id)
+        if db_field.name == "patient":
+            kwargs['queryset'] = InPatient.objects.filter(ward__hospital=authAdmin.hospital,isActive=True)
+            
+        elif db_field.name == "doctor":
+            if self.authMedicareUser.is_admin:
+                pass
+            
+            else:
+                kwargs['queryset'] = HospitalStaff.objects.filter(staff__id=request.user.id)
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+@admin.register(OutPatient)
+class OutPatientAdmin(CurrentUserMixin, admin.ModelAdmin):
+    list_display = ("image_tag","patient_name","location","admitted_on","isActive","action_links")
+    list_filter = ("patient__location__county","patient__location")
+    list_editable = ("isActive",)
+    
     def admitted_on(self, obj):
         return obj.createdAt
     
     def patient_name(self, obj):
         return f"{obj.patient.firstName} {obj.patient.lastName}"
     
-    def ward_no(self, obj):
-        return obj.ward.name
-    
-    def hospital(self, obj):
-        return obj.ward.hospital.name
+    def location(self, obj):
+        return f"{obj.patient.location.county.countyName}, {obj.patient.location.subcountyName}"
     
     def action_links(self, obj):
-        url = "/admin/user/inpatient/"
+        url = "/admin/user/outpatient/"
         return format_html(
             f'''
                 <div style="display:flex;flex-direction:row;">
-                    <a class="default" style="margin-right:1em;" href="{url}{obj.id}/change/">edit</a>
-                    <a class="deletelink" href="{url}{obj.id}/delete/">delete</a>
+                    <a class="button default" style="width:6.5rem;padding-top:0.5rem;padding-bottom:0.5rem;text-align:center;margin-right:1em;" href="{url}{obj.id}/change/">{get_edit_text(self.authMedicareUser.is_admin)}</a>
                 </div>
             '''
         )
 
-@admin.register(OutPatient)
-class OutPatientAdmin(admin.ModelAdmin):
-    pass
-
 @admin.register(OutPatientReport)
-class OutPatientReportAdmin(admin.ModelAdmin):
+class OutPatientReportAdmin(CurrentUserMixin, admin.ModelAdmin):
     pass

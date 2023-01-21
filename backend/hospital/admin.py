@@ -10,10 +10,10 @@ class HospitalAdmin(admin.ModelAdmin):
     list_filter = ("location",)
     
     def county(self,obj):
-        return SubCounty.objects.get(subcounty_code=obj.location.subcounty_code).county
+        return SubCounty.objects.get(subcountyCode=obj.location.subcountyCode).county
     
     def constituency(self,obj):
-        return SubCounty.objects.get(subcounty_code=obj.location.subcounty_code).subcounty_name
+        return SubCounty.objects.get(subcountyCode=obj.location.subcountyCode).subcountyName
     
     def action_links(self, obj):
         url = "/admin/hospital/hospital/"

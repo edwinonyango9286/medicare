@@ -14,7 +14,6 @@ class Ward(models.Model):
     name = models.CharField(max_length=10,unique=True)
     capacity = models.IntegerField()
     occupancy = models.IntegerField(default=0)
-    isFull = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.hospital} -> {self.name}"

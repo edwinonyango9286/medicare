@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from user.models import HospitalStaff
+from user.models import HospitalStaff,Diagnosis
 
 MedicareUser = get_user_model()
 
@@ -22,3 +22,8 @@ class RegisterHospitalStaffForm(forms.ModelForm):
     class Meta:
         model = HospitalStaff
         fields = ["staff","hospital","proffesion"]
+        
+class AddDiagnosisForm(forms.ModelForm):
+    class Meta:
+        model = Diagnosis
+        fields = ["doctor","patient","appointment","doctor","diagnosis"]

@@ -123,3 +123,5 @@ AUTHENTICATION_BACKENDS = [
 CORS_ORIGIN_WHITELIST = [
    "http://localhost:5173",
 ]
+
+LOGOUT_REDIRECT_URL = '/admin/login'

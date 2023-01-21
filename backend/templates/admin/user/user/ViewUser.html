@@ -1,48 +1,48 @@
 {% extends 'admin/base_site.html' %}
 {% load i18n admin_urls static admin_modify %}
 {% block content %}
-    <div style="display: flex;flex-direction: row;">
+    <div style="display: flex;flex-direction: row;color: white;">
         <img style="margin-right: 5em;" width="400" src="{{object.image.url}}" alt="">
         <div style="display: flex;flex-direction: column;">
             <div>
-                <h3>NAME</h3>
+                <h3 style="color: black;text-decoration: underline;">NAME</h3>
                 <p style="margin-left: 1em;">
                     {{object.firstName}} {{object.lastName}}
                 </p>
             </div>
 
             <div>
-                <h3>GENDER</h3>
+                <h3 style="color: black;text-decoration: underline;">GENDER</h3>
                 <p style="margin-left: 1em;">
                     {{object.gender}}
                 </p>
             </div>
 
             <div>
-                <h3>DATE OF BIRTH</h3>
+                <h3 style="color: black;text-decoration: underline;">DATE OF BIRTH</h3>
                 <p style="margin-left: 1em;">
                     {{object.dateOfBirth}}
                 </p>
             </div>
 
             <div>
-                <h3>EMAIL</h3>
+                <h3 style="color: black;text-decoration: underline;">EMAIL</h3>
                 <p style="margin-left: 1em;">
                     {{object.email}}
                 </p>
             </div>
 
             <div>
-                <h3>PHONE NUMBER</h3>
+                <h3 style="color: black;text-decoration: underline;">PHONE NUMBER</h3>
                 <p style="margin-left: 1em;">
                     {{object.phoneNumber}}
                 </p>
             </div>
 
             <div>
-                <h3>LOCATION</h3>
+                <h3 style="color: black;text-decoration: underline;">LOCATION</h3>
                 <p style="margin-left: 1em;">
-                    {{object.location.subcounty_name}}, {{object.location.county}}
+                    {{object.location.county}}, {{object.location.subcountyName}}
                 </p>
             </div>
         </div>

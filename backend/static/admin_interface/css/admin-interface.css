@@ -477,7 +477,7 @@
 .admin-interface #toggle-nav-sidebar:focus,
 .admin-interface #toggle-nav-sidebar:hover,
 .admin-interface #toggle-nav-sidebar:active {
-    color: var(--admin-interface-generic-link-hover-color);
+    color: red;
 }
 
 .admin-interface .calendar td.selected a,

@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static "admin/css/changelists.css" %}">
+  {% if cl.formset %}
+    <link rel="stylesheet" href="{% static "admin/css/forms.css" %}">
+  {% endif %}
+  {% if cl.formset or action_form %}
+    <script src="{% url 'admin:jsi18n' %}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      #changelist table thead th:first-child {width: inherit}
+    </style>
+  {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+<script src="{% static 'admin/js/filters.js' %}" defer></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:user_appointment_changelist' %}">Appointment</a>
+&rsaquo; Make Diagnosis
+</div>
+{% endblock %}
+{% endif %}
+
+{% block coltype %}{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <div style="display: flex;flex-direction: row;background: white;padding: 1rem">
+            <img style="margin-right: 1em;" width="400" src="{{object.patient.image.url}}" alt="">
+            <div style="display:flex;flex-direction:column;">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{form.errors.diagnosis}}
+                    <input style="display:none;"  name="doctor" value="{{object.doctor.id}}" type="text">
+                    <input style="display:none;"  name="patient" value="{{object.patient.id}}" type="text">
+                    <input style="display:none;"  name="appointment" value="{{object.id}}" type="text">
+                    <div>
+                        <textarea placeholder="diagnosis goes here" name="diagnosis" class="vLargeTextField" cols="60" rows="10"></textarea>
+                    </div>
+                    <div style="margin-top:1em;">
+                        <input type="submit" class="default" value="Save Diagnosis" size="50">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
