@@ -1,49 +1,37 @@
-from django.db.models.signals import post_delete,post_save
+from django.db.models.signals import post_delete,post_save,pre_save
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
-from user.models import HospitalStaff
-from django.contrib.auth.models import Group
+from django.db.models import F
+from user.models import HospitalStaff,InPatient,Proffesion
+from hospital.models import Ward
 
 User = get_user_model()
 
-@receiver(post_delete,sender=HospitalStaff)
+@receiver(post_delete, sender=HospitalStaff)
 def drop_user_staff(sender, instance, **kwargs):
     user = User.objects.get(id=instance.staff.id)
     user.is_staff = False
-    user.is_admin = False
     user.groups.clear()
     user.save()
     
-@receiver(post_save,sender=HospitalStaff)
-def make_user_staff(sender, instance,created, **kwargs):
+@receiver(post_save, sender=HospitalStaff)
+def make_user_staff(sender, instance, **kwargs):
     user = User.objects.get(id=instance.staff.id)
     user.groups.clear()
     user.is_staff = True
-    
-    if instance.proffesion.group.name == "hospitalAdmin":
-        user.is_admin = True
-    else:
-        user.is_admin = False
-        
     user.groups.add(instance.proffesion.group)
     user.save()
     
-    
-    # def update_staff
-    
-    
-    
-    # def save(self, force_insert, force_update, using, update_fields) -> None:
-    #     if self.isActive:
-    #         User.objects.filter(id=self.staff__id).update(hospitalStaff=True)
-    #     elif not self.isActive:
-    #         Ward.objects.filter(id=self.ward.id).update(occupancy=F('occupancy')-1)
-            
-    #     if force_insert:
-    #         return super().save(force_insert=force_insert, using=using, update_fields=update_fields)
+@receiver(post_save, sender=InPatient)
+def update_inpatient(sender, instance, **kwargs):
+    if instance.isActive:
+        Ward.objects.filter(id=instance.ward.id).update(occupancy=F('occupancy')+1)
+    elif not instance.isActive:
+        Ward.objects.filter(id=instance.ward.id).update(occupancy=F('occupancy')-1)
         
-    #     if force_update:
-    #         return super().save(force_update=force_update, using=using, update_fields=update_fields)
-        
-    #     else:
-    #         return super().save(using=using,update_fields=update_fields)
+@receiver(pre_save, sender=User)
+def capitalize_names(sender, instance, **kwargs):
+    if instance.firstName:
+        instance.firstName = instance.firstName.upper()
+    if instance.lastName:
+        instance.lastName = instance.lastName.upper()

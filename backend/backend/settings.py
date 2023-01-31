@@ -20,7 +20,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'graphene_django',
-    'channels',
+    'tailwind',
+    'django_browser_reload',
+    'theme',
     'chat',
     'user',
     'location',
@@ -30,6 +32,7 @@ INSTALLED_APPS = [
 X_FRAME_OPTIONS='SAMEORIGIN'
 
 MIDDLEWARE = [
+    'django_browser_reload.middleware.BrowserReloadMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -68,6 +71,10 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
@@ -91,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -100,6 +107,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
+
+STATICFILES_DIR = [
+    os.path.join(BASE_DIR,'static'),
+]
 
 MEDIA_URL = 'media/'
 
@@ -125,3 +136,9 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 LOGOUT_REDIRECT_URL = '/admin/login'
+
+TAILWIND_APP_NAME= 'theme'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

@@ -6,6 +6,9 @@ class County(models.Model):
 
     def __str__(self):
         return self.countyName
+    
+    class Meta:
+        ordering = ("countyName",)
 
 class SubCounty(models.Model):
     county = models.ForeignKey(County,on_delete=models.CASCADE)
@@ -14,3 +17,6 @@ class SubCounty(models.Model):
 
     def __str__(self):
         return f"{self.subcountyName}"
+    
+    class Meta:
+        ordering = ("subcountyName",)

@@ -50,7 +50,7 @@
     {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
     {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
     <input type="submit" style="background: green;" value="{% translate 'Yes, I’m sure' %}">
-    <a href="#" class="button cancel-link">{% translate "No, take me back" %}</a>
+    <a href="/admin/user/inpatient" class="button cancel-link">{% translate "No, take me back" %}</a>
     </div>
     </form>
 {% endif %}

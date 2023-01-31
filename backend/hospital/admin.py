@@ -2,6 +2,9 @@ from django.contrib import admin
 from hospital.models import Hospital,Ward
 from django.utils.html import format_html
 from location.models import SubCounty
+from django.contrib.contenttypes.models import ContentType
+
+admin.site.register(ContentType)
 
 @admin.register(Hospital)
 class HospitalAdmin(admin.ModelAdmin):

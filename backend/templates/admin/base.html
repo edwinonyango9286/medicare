@@ -3,6 +3,7 @@
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr,auto' }}">
 <head>
 <title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" href="{% static "admin_interface/css/medicare.css" %}">
 <link rel="stylesheet" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
 {% block dark-mode-vars %}
   <link rel="stylesheet" href="{% static "admin/css/dark_mode.css" %}">
@@ -21,8 +22,21 @@
 {% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
 <style>
-  ::placeholder{
+  p,a,button,input,select,body,td,th,span,label,b{
+    font-size: 0.9rem;
+  }
+  #branding h1 a span{
+    font-size: x-large;
+  }
+  #nav-filter{
     color: white;
+  }
+  #nav-filter::placeholder{
+    color: white;
+  }
+  #login-form label{
+    color: white;
+    font-size: 1.25rem;
   }
 </style>
 </head>

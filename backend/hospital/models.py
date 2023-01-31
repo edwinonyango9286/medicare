@@ -11,6 +11,7 @@ class Hospital(models.Model):
 
 class Ward(models.Model):
     hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
+    type = models.CharField(max_length=20,default="NORMAL")
     name = models.CharField(max_length=10,unique=True)
     capacity = models.IntegerField()
     occupancy = models.IntegerField(default=0)

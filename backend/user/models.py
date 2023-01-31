@@ -40,11 +40,10 @@ class User(AbstractBaseUser,PermissionsMixin):
     gender = models.CharField(max_length=10,choices=gender_choices,blank=True,null=True)
     dateOfBirth = models.DateField(blank=True,null=True)
     location = models.ForeignKey(SubCounty,on_delete=models.SET_NULL,null=True,blank=True,verbose_name="constituency")
-    image = models.ImageField(upload_to=upload_profileImage,blank=True,null=True)
+    image = models.ImageField(upload_to=upload_profileImage,default="profiles/default.jpg")
     is_staff = models.BooleanField(default=False)
     createdAt = models.DateTimeField(auto_now_add=True,verbose_name="registered on")
     updatedAt = models.DateTimeField(auto_now=True, verbose_name="last updated")
-    is_admin = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
 
@@ -57,7 +56,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     
     def  image_tag(self):
         return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.image))
-
+    
+    def is_admin(self):
+        return self.groups.filter(name="hospitalAdmin").exists()
 
     image_tag.allow_tags = True
 
@@ -92,7 +93,7 @@ class Appointment(models.Model):
     isActive = models.BooleanField(default=True,verbose_name="is active")
     
     class Meta:
-        ordering = ("-isActive","createdAt")
+        ordering = ("-isActive","-createdAt")
 
     def __str__(self) -> str:
         return "{}->{}".format(self.patient,self.doctor)
@@ -112,7 +113,7 @@ class Diagnosis(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True, verbose_name="made on")
     
     class Meta:
-        ordering = ("-isActive","createdAt")
+        ordering = ("-isActive","-createdAt")
 
     def __str__(self) -> str:
         return "{}->{}".format(self.patient,self.doctor)
@@ -130,7 +131,7 @@ class Prescription(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True,verbose_name="prescribed on")
     
     class Meta:
-        ordering = ("-isActive","createdAt")
+        ordering = ("-isActive","-createdAt")
 
     def __str__(self) -> str:
         return f"{self.diagnosis.patient} -> {self.prescription}"
@@ -144,16 +145,13 @@ class Prescription(models.Model):
 class InPatient(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
     ward = models.ForeignKey(Ward,on_delete=models.CASCADE)
-    dischargedBy = models.ForeignKey(HospitalStaff,on_delete=models.CASCADE,null=True,blank=True,default=None)
+    dischargedBy = models.ForeignKey(HospitalStaff,on_delete=models.CASCADE,null=True,blank=True,default=None,verbose_name="discharged by")
     dischargedOn = models.DateTimeField(blank=True,null=True,default=None,verbose_name="discharged on")
     isActive = models.BooleanField(default=True,verbose_name="Still Admitted") 
     createdAt = models.DateTimeField(auto_now_add=True,verbose_name="admitted on")
     
     class Meta:
-        ordering = ("-isActive","createdAt")
-    
-    class Meta:
-        ordering = ("id",)
+        ordering = ("-isActive","-createdAt")
 
     def __str__(self) -> str:
         return f"{self.patient} -> {self.ward}"
@@ -168,23 +166,7 @@ class InPatient(models.Model):
         return f"{self.ward.name}"
     
     def hospital(self):
-        return f"{self.ward.hospital.name}"
-    
-    def save(self, force_insert, force_update, using, update_fields) -> None:
-        if self.isActive:
-            Ward.objects.filter(id=self.ward.id).update(occupancy=F('occupancy')+1)
-        elif not self.isActive:
-            Ward.objects.filter(id=self.ward.id).update(occupancy=F('occupancy')-1)
-            
-        if force_insert:
-            return super().save(force_insert=force_insert, using=using, update_fields=update_fields)
-        
-        if force_update:
-            return super().save(force_update=force_update, using=using, update_fields=update_fields)
-        
-        else:
-            return super().save(using=using,update_fields=update_fields)
-            
+        return f"{self.ward.hospital.name}"            
 
 class InPatientReport(models.Model):
     patient = models.ForeignKey(InPatient,on_delete=models.CASCADE)
@@ -193,18 +175,20 @@ class InPatientReport(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ("createdAt",)
+        ordering = ("-createdAt",)
 
     def __str__(self) -> str:
         return str(self.patient)
 
 class OutPatient(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
+    dischargedBy = models.ForeignKey(HospitalStaff,on_delete=models.CASCADE,null=True,blank=True,default=None,verbose_name="discharged by")
+    dischargedOn = models.DateTimeField(blank=True,null=True,default=None,verbose_name="discharged on")
     isActive = models.BooleanField(default=True)
     createdAt = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ("-isActive","createdAt")
+        ordering = ("-isActive","-createdAt")
 
     def __str__(self) -> str:
         return str(self.patient)
@@ -219,7 +203,7 @@ class OutPatientReport(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ("createdAt",)
+        ordering = ("-createdAt",)
 
     def __str__(self) -> str:
         return str(self.patient)

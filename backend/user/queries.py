@@ -1,10 +1,9 @@
 import graphene
-from graphene_django import DjangoObjectType
 from user.models import Proffesion, HospitalStaff, Appointment, Diagnosis, Prescription, InPatient, OutPatient, OutPatientReport
 from user.schema import UserType,ProffesionType, HospitalStaffType, AppointmentType, DiagnosisType, PrescriptionType, InPatientType, OutPatientType, OutPatientReportType
 from django.contrib.auth import get_user_model
 
-MedicareUser = get_user_model()
+User = get_user_model()
 
 class UserQuery(graphene.ObjectType):
     user_data = graphene.Field(UserType)

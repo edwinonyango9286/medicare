@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from user.models import HospitalStaff,Diagnosis
+from user.models import HospitalStaff,Diagnosis,InPatient,Appointment
+from hospital.models import Ward
 
-MedicareUser = get_user_model()
+User = get_user_model()
 
 class RegisterForm(forms.ModelForm):
     class Meta:
-        model = MedicareUser
+        model = User
         password2 = forms.CharField(max_length=15)
         fields = ["firstName","lastName","email", "phoneNumber","dateOfBirth", "gender","image","location","nationalId","password"]
 
@@ -23,7 +24,28 @@ class RegisterHospitalStaffForm(forms.ModelForm):
         model = HospitalStaff
         fields = ["staff","hospital","proffesion"]
         
+class AddAppointmentForm(forms.ModelForm):
+    class Meta:
+        model = Appointment
+        fields = ["doctor","patient","hospital"]
+        
 class AddDiagnosisForm(forms.ModelForm):
     class Meta:
         model = Diagnosis
         fields = ["doctor","patient","appointment","doctor","diagnosis"]
+        
+class AddInPatientForm(forms.ModelForm):
+    class Meta:
+        model = InPatient
+        fields = ["patient","ward"]
+        
+    def clean(self):
+        ward = self.cleaned_data['ward']
+        patient = self.cleaned_data['patient']
+        if ward.occupancy == ward.capacity:
+            raise forms.ValidationError("Ward chosen is at full capacity")
+        
+        if InPatient.objects.filter(patient__id=patient.id,isActive=True):
+            raise forms.ValidationError("This patient has an active admission")
+        
+        return super().clean()

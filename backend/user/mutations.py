@@ -1,12 +1,12 @@
 import graphene
 import graphql_jwt
 from graphene_file_upload.scalars import Upload
-from user.forms import RegisterForm,RegisterHospitalStaffForm
+from user.forms import RegisterForm,RegisterHospitalStaffForm,AddAppointmentForm
 from user.models import HospitalStaff, Appointment
 from django.contrib.auth import get_user_model
 from location.models import SubCounty
 
-MedicareUser = get_user_model()
+User = get_user_model()
 
 class RegisterUserMutation(graphene.Mutation):
     success = graphene.Boolean()
@@ -80,7 +80,7 @@ class RegisterHospitalStaffMutation(graphene.Mutation):
 
                     except HospitalStaff.DoesNotExist:
                         form.save()
-                        MedicareUser.objects.filter(id=form.data["staff"]).update(hospitalStaff=True)
+                        User.objects.filter(id=form.data["staff"]).update(hospitalStaff=True)
                         return RegisterHospitalStaffMutation(success=True, error="")
 
                 else:
@@ -105,7 +105,7 @@ class DeleteHospitalStaffMutation(graphene.Mutation):
             try:
                 HospitalStaff.objects.get(staff__id=staffId)
                 HospitalStaff.objects.filter(staff__id=staffId).delete()
-                MedicareUser.objects.filter(id=staffId).update(hospitalStaff=False)
+                User.objects.filter(id=staffId).update(hospitalStaff=False)
 
                 return DeleteHospitalStaffMutation(success=True, error="")
 
@@ -134,19 +134,19 @@ class UpdateUserMutation(graphene.Mutation):
             if ("email" in data) and len(data["email"].strip()) > 0:
                 try:
                     proceed = False
-                    MedicareUser.objects.get(email=data["email"])
+                    User.objects.get(email=data["email"])
                     return UpdateUserMutation(success=False, error="A user with this email address already exists")
 
-                except MedicareUser.DoesNotExist:
+                except User.DoesNotExist:
                     pass
 
             if ("phoneNumber" in data) and len(data["phoneNumber"].strip()) > 0:
                 try:
                     proceed = False
-                    MedicareUser.objects.get(phoneNumber=data["phoneNumber"])
+                    User.objects.get(phoneNumber=data["phoneNumber"])
                     return UpdateUserMutation(success=False, error="A user with this phone number address already exists")
 
-                except MedicareUser.DoesNotExist:
+                except User.DoesNotExist:
                     pass
 
             if ("password" in data) and len(data["password"].strip()) > 0:
@@ -156,7 +156,13 @@ class UpdateUserMutation(graphene.Mutation):
                 
                 else:
                     if ("password2" in data) and (data["password"] == data["password2"]):
-                        pass
+                        user = User.objects.get(id=info.context.user.id)
+                        if user.check_password(data["password"]):
+                            user.set_password(data["password"])
+                            return UpdateUserMutation(success=True, error=False)
+                        
+                        else:
+                            return UpdateUserMutation(success=False, error="password entered is wrong")
                     
                     else:
                         proceed = False
@@ -164,19 +170,19 @@ class UpdateUserMutation(graphene.Mutation):
 
             if proceed:
                 if image:
-                    MedicareUser.objects.filter(id=authUser.id).update(image=image)
+                    User.objects.filter(id=authUser.id).update(image=image)
 
                 if ("email" in data) and len(data["email"].strip()) > 0:
-                    MedicareUser.objects.filter(id=authUser.id).update(email=data["email"])
+                    User.objects.filter(id=authUser.id).update(email=data["email"])
 
                 if ("location" in data) and len(data["location"].strip()) > 0:
-                    MedicareUser.objects.filter(id=authUser.id).update(location=SubCounty.objects.get(id=data["location"]))
+                    User.objects.filter(id=authUser.id).update(location=SubCounty.objects.get(id=data["location"]))
 
                 if ("phoneNumber" in data) and len(data["phoneNumber"].strip()) > 0:
-                    MedicareUser.objects.filter(id=authUser.id).update(phoneNumber=data["phoneNumber"])
+                    User.objects.filter(id=authUser.id).update(phoneNumber=data["phoneNumber"])
 
                 if ("password" in data) and len(data["password"].strip()) > 0:
-                    updateUser = MedicareUser.objects.get(id=authUser.id)
+                    updateUser = User.objects.get(id=authUser.id)
                     updateUser.set_password(data["password"])
                     updateUser.save()
 
@@ -189,7 +195,7 @@ class UpdateUserMutation(graphene.Mutation):
         else:
             return UpdateUserMutation(success=False, error="Authentication credentials not provided")
 
-class AddAppointmentMutation:
+class AddAppointmentMutation(graphene.Mutation):
     success = graphene.Boolean()
     error = graphene.String()
 
@@ -197,7 +203,7 @@ class AddAppointmentMutation:
         hospitalId = graphene.String()
         doctorId = graphene.String()
 
-    def mutate(root, info, **data):
+    def mutate(root, info, doctorId, hospitalId):
         authUser = info.context.user
         if authUser.is_authenticated:
             try:
@@ -205,7 +211,10 @@ class AddAppointmentMutation:
                 return AddAppointmentMutation(success=False, error="You have an active appointment")
 
             except Appointment.DoesNotExist:
-                pass
+                appointmet_data = {"hospital":hospitalId,"doctor":doctorId,"patient":info.context.user.id}
+                form = AddAppointmentForm(data=appointmet_data)
+                
+                return AddAppointmentMutation(success=True, error=appointmet_data)
 
         else:
             return AddAppointmentMutation(success=False, error="Please login to proceed")
@@ -214,6 +223,7 @@ class UserMutation(graphene.ObjectType):
     registerUser = RegisterUserMutation.Field()
     addHospitalStaff = RegisterHospitalStaffMutation.Field()
     deleteHospitalStaff = DeleteHospitalStaffMutation.Field()
+    addAppointment = AddAppointmentMutation.Field()
     updateUser = UpdateUserMutation.Field()
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.Verify.Field()

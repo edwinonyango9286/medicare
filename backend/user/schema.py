@@ -2,11 +2,11 @@ from graphene_django import DjangoObjectType
 from user.models import Proffesion,HospitalStaff,Appointment,Diagnosis,Prescription,InPatient,OutPatient,OutPatientReport
 from django.contrib.auth import get_user_model
 
-MedicareUser = get_user_model()
+User = get_user_model()
 
 class UserType(DjangoObjectType):
     class Meta:
-        model = MedicareUser
+        model = User
         fields = ("id","firstName","lastName","email", "phoneNumber","dateOfBirth","gender","image","location","nationalId","is_staff","is_superuser")
 
 class ProffesionType(DjangoObjectType):
@@ -27,7 +27,7 @@ class AppointmentType(DjangoObjectType):
 class DiagnosisType(DjangoObjectType):
     class Meta:
         model = Diagnosis
-        fields = ("doctor","patient","appointment","hospital","diagnosis","createdAt")
+        fields = ("doctor","patient","appointment","diagnosis","createdAt")
 
 class PrescriptionType(DjangoObjectType):
     class Meta:
@@ -37,14 +37,14 @@ class PrescriptionType(DjangoObjectType):
 class InPatientType(DjangoObjectType):
     class Meta:
         model = InPatient
-        fields = ("patient","ward","admittedAt")
+        fields = ("patient","ward","createdAt")
 
 class OutPatientType(DjangoObjectType):
     class Meta:
         model = OutPatient
-        fields = ("patient","admittedAt")
+        fields = ("patient","createdAt")
 
 class OutPatientReportType(DjangoObjectType):
     class Meta:
         model = OutPatientReport
-        fields = ("patient","report","recordedAt")
+        fields = ("patient","report","createdAt")
