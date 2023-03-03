@@ -19,4 +19,4 @@ class SubCounty(models.Model):
         return f"{self.subcountyName}"
     
     class Meta:
-        ordering = ("subcountyName",)
+        ordering = ("county__countyName","subcountyName")

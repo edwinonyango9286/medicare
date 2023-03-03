@@ -1,7 +1,0 @@
-{% extends 'medicare/base.html' %}
-{% block content %}
-    {% if user.is_authenticated%}
-    <p>Hello {{user.email}}</p>
-    {{user.firstName}} {{user.lastName}}
-    {% endif %}
-{% endblock %}

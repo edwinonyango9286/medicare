@@ -1,6 +1,6 @@
 from django.db import models
 from location.models import SubCounty
-from django.contrib import admin
+from uuid import uuid4
 
 class Hospital(models.Model):
     location = models.ForeignKey(SubCounty,on_delete=models.CASCADE)

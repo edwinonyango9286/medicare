@@ -38,10 +38,19 @@
     color: white;
     font-size: 1.25rem;
   }
+  input,button,select{
+    box-shadow: none !important;
+  }
+  body{
+    background-image: linear-gradient(135deg, #71b7e6, #9b59b6);
+    height: 100vh;
+    width: 100vw;
+  }
 </style>
+
 </head>
 
-<body style="background-image: linear-gradient(to right,#4c1d95,#0369a1);" class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
   data-admin-utc-offset="{% now "Z" %}">
 
 <!-- Container -->
@@ -50,7 +59,7 @@
     {% if not is_popup %}
     <!-- Header -->
     {% block header %}
-    <div style="background-image: linear-gradient(to right,#4c1d95,#0369a1);" id="header">
+    <div style="background-image: linear-gradient(135deg, #71b7e6, #9b59b6)" id="header">
         <div id="branding">
         {% block branding %}{% endblock %}
         </div>
@@ -75,7 +84,7 @@
     {% endblock %}
     <!-- END Header -->
     {% block breadcrumbs %}
-    <div style="background-image: linear-gradient(to right,#4c1d95,#0369a1);" class="breadcrumbs">
+    <div style="background-image: linear-gradient(to bottom, #71b7e6, #9b59b6)" class="breadcrumbs">
     <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
     {% if title %} &rsaquo; {{ title }}{% endif %}
     </div>

@@ -7,6 +7,7 @@ import os
 from django.utils.safestring import mark_safe
 from django.db.models import F
 from django.contrib.auth.models import Group
+from uuid import uuid4
 
 class UserManager(BaseUserManager):
     def create_superuser(self,email,password,nationalId,phoneNumber):
@@ -32,8 +33,8 @@ def upload_profileImage(instance,filename):
     return f"profiles/{image_name}{extension}"
 
 class User(AbstractBaseUser,PermissionsMixin):
-    firstName = models.CharField(max_length=20,null=True,blank=True)
-    lastName = models.CharField(max_length=20,null=True,blank=True)
+    id = models.UUIDField(default=uuid4,primary_key=True, editable=False)
+    username = models.CharField(max_length=50,null=True,blank=True)
     email = models.EmailField(max_length=50,unique=True)
     phoneNumber = models.CharField(max_length=15,unique=True)
     nationalId = models.CharField(max_length=15,unique=True)
@@ -50,6 +51,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     REQUIRED_FIELDS = ['nationalId',"phoneNumber"]
 
     objects = UserManager()
+    
+    def imageUrl(self):
+        return self.image.url
 
     def __str__(self) -> str:
         return self.email
@@ -82,9 +86,9 @@ class HospitalStaff(models.Model):
     def __str__(self) -> str:
         return "{}->{}->{}".format(self.staff, self.proffesion, self.hospital)
     
-    def  image_tag(self):
+    def  image(self):
         return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.staff.image))
-
+    
 class Appointment(models.Model):
     patient =  models.ForeignKey(User, on_delete=models.CASCADE)
     doctor =  models.ForeignKey(HospitalStaff, on_delete=models.CASCADE)
@@ -172,7 +176,13 @@ class InPatientReport(models.Model):
     patient = models.ForeignKey(InPatient,on_delete=models.CASCADE)
     doctor = models.ForeignKey(HospitalStaff, on_delete=models.CASCADE)
     report = models.TextField()
-    createdAt = models.DateTimeField(auto_now_add=True)
+    createdAt = models.DateTimeField(auto_now_add=True,verbose_name="reported at")
+    
+    def doctor_name(self):
+        return f"{self.doctor.staff.firstName} {self.doctor.staff.lastName}"
+    
+    def patient_name(self):
+        return f"{self.patient.patient.firstName} {self.patient.patient.lastName}"
     
     class Meta:
         ordering = ("-createdAt",)

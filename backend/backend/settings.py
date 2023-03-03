@@ -12,6 +12,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -20,9 +21,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'graphene_django',
-    'tailwind',
-    'django_browser_reload',
-    'theme',
     'chat',
     'user',
     'location',
@@ -32,7 +30,6 @@ INSTALLED_APPS = [
 X_FRAME_OPTIONS='SAMEORIGIN'
 
 MIDDLEWARE = [
-    'django_browser_reload.middleware.BrowserReloadMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -61,20 +58,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 
-ASGI_APPLICATION = 'chat.routing.application'
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': "channels.layer.InMemoryChannelLayer"
-    }
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
@@ -106,9 +101,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
-
-STATICFILES_DIR = [
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'static'),
 ]
 
@@ -131,14 +124,10 @@ AUTHENTICATION_BACKENDS = [
     "graphql_jwt.backends.JSONWebTokenBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
 CORS_ORIGIN_WHITELIST = [
    "http://localhost:5173",
+   "http://localhost:8080",
 ]
 
 LOGOUT_REDIRECT_URL = '/admin/login'
-
-TAILWIND_APP_NAME= 'theme'
-
-INTERNAL_IPS = [
-    "127.0.0.1",
-]

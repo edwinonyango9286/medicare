@@ -5,14 +5,21 @@ from graphql_jwt.decorators import jwt_cookie
 from graphene_file_upload.django import FileUploadGraphQLView
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import render
+from django.http import JsonResponse
+from graphql_jwt.backends import get_user_by_token
+from graphql_jwt.exceptions import JSONWebTokenError
 
-def home(request):
-    return render(request=request,template_name='medicare/home.html')
+def test(request):
+    user = None
+    try:
+        user = get_user_by_token(request.headers['Authorization'])
+    except JSONWebTokenError:
+        user= None
+    print(user)
+    return JsonResponse({'data':'data'})
 
 urlpatterns = [
-    path('__reload__/',include("django_browser_reload.urls")),
     path('admin/', admin.site.urls),
-    path("api", csrf_exempt(jwt_cookie(FileUploadGraphQLView.as_view(graphiql=True)))),
-    path('',home,name='home'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api',csrf_exempt(jwt_cookie(FileUploadGraphQLView.as_view(graphiql=True)))),
+    path('test/',test)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

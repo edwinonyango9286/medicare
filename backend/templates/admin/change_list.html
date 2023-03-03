@@ -40,6 +40,8 @@
 
 {% block content %}
   <div id="content-main">
+    <h2 style="color:black ;font-size: xx-large;">List of {{ cl.opts.verbose_name_plural|capfirst }}</h2>
+    <hr>
     {% block object-tools %}
         <ul class="object-tools">
           {% block object-tools-items %}

@@ -1,13 +1,20 @@
 from graphene_django import DjangoObjectType
 from user.models import Proffesion,HospitalStaff,Appointment,Diagnosis,Prescription,InPatient,OutPatient,OutPatientReport
 from django.contrib.auth import get_user_model
+import graphene
 
 User = get_user_model()
 
 class UserType(DjangoObjectType):
     class Meta:
         model = User
-        fields = ("id","firstName","lastName","email", "phoneNumber","dateOfBirth","gender","image","location","nationalId","is_staff","is_superuser")
+        fields = ("id","username","email", "phoneNumber","dateOfBirth","gender","image","location","nationalId","is_staff","is_superuser","image_url")
+        
+    image_url = graphene.String()
+    
+    @staticmethod
+    def resolve_image_url(root, info, **kwargs):
+        return root.image.url
 
 class ProffesionType(DjangoObjectType):
     class Meta:

@@ -2,15 +2,20 @@ from django.contrib import admin
 from datetime import datetime
 from django.utils.html import format_html
 from user.models import Proffesion,HospitalStaff,Appointment,Prescription,Diagnosis,InPatient,InPatientReport,OutPatient,OutPatientReport
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView,View,ListView
 from django.urls import path, reverse
 from user.forms import AddDiagnosisForm,AddInPatientForm
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.db.models import Q, F
 from hospital.models import Hospital, Ward
 from django.contrib.admin.models import LogEntry
 from django.utils.translation import gettext_lazy
 from django.contrib.auth import get_user_model
+from admin_interface.models import Theme
+from django.contrib.auth.models import Group
+
+# admin.site.unregister(Theme)
+# admin.site.unregister(Group)
 
 User = get_user_model()
 
@@ -84,7 +89,7 @@ class ViewUserActions(DetailView):
 
 @admin.register(User)
 class UserAdmin(CurrentUserMixin, admin.ModelAdmin):
-    list_display = ("image_tag","name","email","gender","age","phone_number","county","location","action_links")
+    list_display = ("image_tag","username","email","gender","age","phone_number","county","location","action_links")
     list_per_page = 20
     search_fields = ("firstName__startswith","lastName__startswith")
     list_filter = ("location__county","location","dateOfBirth")
@@ -131,13 +136,6 @@ class UserAdmin(CurrentUserMixin, admin.ModelAdmin):
     def phone_number(self,obj):
         return obj.phoneNumber
     
-    def name(self,obj):
-        if obj.firstName or obj.lastName:
-            return f"{obj.firstName} {obj.lastName}"
-    
-        else:
-            return "_"
-    
     def action_links(self, obj):
         url = "/admin/user/user/"
         view_url = reverse("admin:user_user_change",args=[obj.pk])
@@ -176,10 +174,10 @@ class ProffesionAdmin(CurrentUserMixin, admin.ModelAdmin):
 
 @admin.register(HospitalStaff)
 class HospitalStaffAdmin(CurrentUserMixin, admin.ModelAdmin):
-    list_display = ("id","name","email","hospital","role","action_links")
+    list_display = ("image","name","email","hospital","role","action_links")
     list_per_page = 20
     list_filter = ("hospital","proffesion")
-    # search_fields = ("hospital__startswith",)
+    search_fields = ("hospital__startswith",)
     
     def name(self, obj):
         return f"{obj.staff.firstName} {obj.staff.lastName}"
@@ -202,6 +200,8 @@ class HospitalStaffAdmin(CurrentUserMixin, admin.ModelAdmin):
         
     def get_queryset(self, request):
         if request.user.is_authenticated:
+            if request.user.is_superuser:
+                return super().get_queryset(request).filter(proffesion__type="hospital adminstrator")
             try:
                 authAdmin = HospitalStaff.objects.get(staff__id=request.user.id)
                 return super().get_queryset(request).filter(hospital__id=authAdmin.hospital.id)
@@ -212,6 +212,14 @@ class HospitalStaffAdmin(CurrentUserMixin, admin.ModelAdmin):
                 
                 else:
                     return  super().get_queryset(request=request).filter(id=None)
+                
+class AddAppointment(View):
+    template_name = "admin/user/appointment/AddAppointment.html"
+    
+    def get(self, request):
+        context = {**admin.site.each_context(self.request)}
+        context["patients"] = User.objects.filter(~Q(id=request.user.id))
+        return render(request=request,template_name=self.template_name,context=context)
                 
 class CancelAppointment(DetailView):
     model = Appointment
@@ -241,6 +249,11 @@ class AppointmentAdmin(CurrentUserMixin,admin.ModelAdmin):
                 "<pk>/cancel",
                 self.admin_site.admin_view(CancelAppointment.as_view()),
                 name=f"cancel_appointment"
+            ),
+            path(
+                "add/",
+                self.admin_site.admin_view(AddAppointment.as_view()),
+                name = f"add_appointment"
             ),
             *super().get_urls(),
         ]
@@ -533,7 +546,7 @@ class InPatientAdmin(CurrentUserMixin, admin.ModelAdmin):
         
 @admin.register(InPatientReport)
 class InPatientReportAdmin(CurrentUserMixin, admin.ModelAdmin):
-    list_display = ("id","patient","createdAt")
+    list_display = ("id","patient_name","doctor_name","report","createdAt")
     list_per_page = 20
     list_filter = ("doctor","patient__patient__location__county","patient__patient__location")
     

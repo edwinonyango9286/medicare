@@ -6,8 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
   </head>
-  <body class="bg-gradient-to-r from-violet-900 to-sky-700 font-sans text-xl">
-    <div id="root" class="min-h-screen"></div>
-    <script type="module" src="/src/main.jsx"></script>
+  <style>
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active{
+        -webkit-box-shadow: 0 0 0 30px white inset !important;
+    }
+    .loader-mixin{
+        animation: spinAround .5s infinite linear;
+        border: 2px solid #dbdbdb;
+        border-radius: 9999px;
+        border-right-color: transparent;
+        border-top-color: hsl(217, 71%, 53%);
+        display: block;
+        height: 2.5em;
+        position: relative;
+        width: 2.5em;
+    }
+    body{
+      height: 100vh;
+      width: 100vw;
+      background: linear-gradient(135deg, #71b7e6, #9b59b6);
+    }
+  </style>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

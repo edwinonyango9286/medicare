@@ -2,6 +2,7 @@ import graphene
 from user.models import Proffesion, HospitalStaff, Appointment, Diagnosis, Prescription, InPatient, OutPatient, OutPatientReport
 from user.schema import UserType,ProffesionType, HospitalStaffType, AppointmentType, DiagnosisType, PrescriptionType, InPatientType, OutPatientType, OutPatientReportType
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -16,6 +17,15 @@ class UserQuery(graphene.ObjectType):
     inPatient = graphene.Field(InPatientType, hospitalId=graphene.String(required=False), patientId=graphene.String(required=False)) 
     inPatients = graphene.List(InPatientType, hospitalId=graphene.String(required=False))
     wardInPatients = graphene.List(InPatientType, wardId=graphene.String())
+    doctors = graphene.List(HospitalStaffType, group_id=graphene.String())
+    
+    def resolve_doctors(root, info, group_id):
+        user = info.context.user
+        if user.is_authenticated:
+            return HospitalStaff.objects.filter(~Q(staff__id=info.context.user.id),staff__groups__id=group_id)
+        
+        else:
+            return {}
 
     def resolve_inPatient(root, info, hospitalId, patientId):
         user = info.context.user

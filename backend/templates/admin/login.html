@@ -1,68 +1,51 @@
-{% extends "admin/base_site.html" %}
-{% load i18n static %}
-
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/login.css" %}">
-{{ form.media }}
-{% endblock %}
-
-{% block bodyclass %}{{ block.super }} login{% endblock %}
-
-{% block usertools %}{% endblock %}
-
-{% block nav-global %}{% endblock %}
-
-{% block nav-sidebar %}{% endblock %}
-
-{% block content_title %}{% endblock %}
-
-{% block breadcrumbs %}{% endblock %}
-
-{% block content %}
-{% if form.errors and not form.non_field_errors %}
-<p class="errornote">
-{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
-</p>
-{% endif %}
-
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<p class="errornote">
-    {{ error }}
-</p>
-{% endfor %}
-{% endif %}
-
-<div id="content-main">
-
-{% if user.is_authenticated %}
-<p class="errornote">
-{% blocktranslate trimmed %}
-    You are authenticated as {{ username }}, but are not authorized to
-    access this page. Would you like to login to a different account?
-{% endblocktranslate %}
-</p>
-{% endif %}
-
-<form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-  <div class="form-row">
-    {{ form.username.errors }}
-    {{ form.username.label_tag }} {{ form.username }}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicare Adminstraion</title>
+  <link rel="stylesheet" href="{% static 'css/admin/login.css' %}">
+</head>
+<body style="background: linear-gradient(135deg, #71b7e6, #9b59b6)">
+  <div class="mdc-content-container">
+    <div class="mdc-container">
+      <div class="mdc-title-container">
+          <span>Medicare Adminstration</span>
+      </div>
+      <hr>
+      <div class="mdc-title">Login</div>
+      
+      {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}
+      <p class="mdc-text-danger">
+          {{ error }}
+      </p>
+      {% endfor %}
+      {% endif %}
+      <div class="mdc-content">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mdc-user-details">
+            <div class="mdc-input-box">
+              <span class="mdc-details">Email</span>
+              <input type="text" name="username" placeholder="Enter your email" required>
+              <div class="mdc-text-danger">{{form.errors.username}}</div>
+            </div>
+          
+            <div class="mdc-input-box">
+              <span class="mdc-details">Password</span>
+              <input type="password" name="password" placeholder="Enter your password" required>
+              <div class="mdc-text-danger">{{form.errors.password}}</div>
+            </div>
+          </div>
+          <div class="mdc-button">
+            <input type="submit" value="Login">
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <div class="form-row">
-    {{ form.password.errors }}
-    {{ form.password.label_tag }} {{ form.password }}
-    <input type="hidden" name="next" value="{{ next }}">
-  </div>
-  {% url 'admin_password_reset' as password_reset_url %}
-  {% if password_reset_url %}
-  <div class="password-reset-link">
-    <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
-  </div>
-  {% endif %}
-  <div class="submit-row">
-    <input type="submit" value="{% translate 'Log in' %}">
-  </div>
-</form>
-
-</div>
-{% endblock %}
+</body>
+</html>

@@ -13,31 +13,29 @@ class RegisterUserMutation(graphene.Mutation):
     error = graphene.String()
 
     class Arguments:
-        firstName = graphene.String()
-        lastName = graphene.String()
+        username = graphene.String()
         email = graphene.String()
         phoneNumber = graphene.String()
+        dateOfBirth = graphene.Date()
         gender = graphene.String()
         location = graphene.String()
-        image = Upload()
         nationalId = graphene.String()
         password = graphene.String()
         password2 = graphene.String()
-        dateOfBirth = graphene.Date()
 
-    def mutate(root, info,password2, image=None, **data):
-        file_data = {}
+    def mutate(root, info,password2, **data):
 
         if len(data["password"]) < 8:
             return RegisterUserMutation(success=False,error = "The password should have at least 8 characters")
 
         if data["password"] != password2:
             return RegisterUserMutation(success=False,error = "The passwords do not match")
+        
+        data["username"] = data["username"].upper()
+        data["gender"] = data["gender"].upper()
+        print(data["gender"])
 
-        if image:
-            file_data = {"image":image}
-
-        form = RegisterForm(data=data,files=file_data)
+        form = RegisterForm(data=data)
 
         if form.is_valid():
             form.save()
@@ -48,11 +46,12 @@ class RegisterUserMutation(graphene.Mutation):
             for value in data:
                 if len(value.strip()) == 0:
                     proceed = False
-                    return RegisterForm(success="Please fill out all fields")
+                    return RegisterForm(success=False,error = "Please fill out all fields")
 
             if proceed:
                 nerror = []
-                allerror = form.error.get_json_data()
+                allerror = form.errors.get_json_data()
+                print(allerror)
                 for error in allerror:
                     for x_error in allerror[error]:
                         nerror.append(x_error["message"])

@@ -31,7 +31,8 @@ def update_inpatient(sender, instance, **kwargs):
         
 @receiver(pre_save, sender=User)
 def capitalize_names(sender, instance, **kwargs):
-    if instance.firstName:
-        instance.firstName = instance.firstName.upper()
-    if instance.lastName:
-        instance.lastName = instance.lastName.upper()
+    if instance.username:
+        instance.username = instance.username.upper()
+        
+    if isinstance.gender:
+        instance.gender = instance.gender.upper()

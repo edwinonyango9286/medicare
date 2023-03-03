@@ -9,7 +9,7 @@ class RegisterForm(forms.ModelForm):
     class Meta:
         model = User
         password2 = forms.CharField(max_length=15)
-        fields = ["firstName","lastName","email", "phoneNumber","dateOfBirth", "gender","image","location","nationalId","password"]
+        fields = ["username","email", "phoneNumber","dateOfBirth", "gender","location","nationalId","password"]
 
     def save(self, commit=True):
         user = super(RegisterForm, self).save(commit=False)
