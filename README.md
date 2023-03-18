@@ -26,21 +26,21 @@ Medicare is a web-based hospital management system that enables patients and doc
 
 ## Getting Started
 
-1. Clone the repository and navigate to the project root directory.
-cd medicare
-cd backend
-pip install -r requirements.txt
-python manage.py runserver
+1. Clone the repository and navigate to the project root directory. <br />
+`cd medicare <br />
+cd backend <br />
+pip install -r requirements.txt <br />
+python manage.py runserver`
 
-2. In a new terminal window, run the frontend server
-cd ../frontend
-npm install
-npm run dev
+2. In a new terminal window, run the frontend server <br />
+`cd ../frontend <br />
+npm install <br />
+npm run dev`
 
 
 3. Open your web browser and go to `http://localhost:5173` to see the app running.
 
-4. For admistration navigate to http://localhost:8000/admin`
+4. For admistration navigate to `http://localhost:8000/admin`
 
 ## Conclusion
 
