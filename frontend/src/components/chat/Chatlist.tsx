@@ -1,7 +1,7 @@
 import React from 'react';
 import "./test.css";
 import "../../query/chat";
-
+import "./image.jpeg";
 
 const Chatlist = () => {
   return (
@@ -28,7 +28,8 @@ const Chatlist = () => {
   <button
   //  onClick={displaychats}
    >
-    <img src="image.jpeg" alt="" width="30px" height="30px" id="image" /> </button>
+    <img src={'image.jpeg'} alt="" width="30px" height="30px" id="image" /> 
+    </button>
 
 
 

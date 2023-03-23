@@ -72,7 +72,7 @@ img:hover{
 .number{
     padding-left: 5%;
     padding-top: 3%;
-    color: whitesmoke;
+    color:blue;
 
 }
 .number:hover{
@@ -85,7 +85,7 @@ img:hover{
     height: 80vh;
 }
 .message1{
-    /* width: 20vw; */
+    width: 20vw;
     height: 8vh;
     border: 2px solid black;
     border-radius: 10px;
@@ -95,12 +95,13 @@ img:hover{
 background-color: whitesmoke;
 }
 .message2{
+    width: 20vw;
     margin-top: 2%;
     margin-bottom: 2%;
     border-radius: 10px;
     height: 8vh;
     border: 2px solid black;
-    margin-left: 50%;
+    margin-left: 20%;
 }
 .message2:hover{
     background-color: whitesmoke;
