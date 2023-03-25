@@ -52,18 +52,18 @@ button{
 
 .image img{
     padding-left: 5%;
-    /* padding-top: 1%; */
-    height: auto;
+    padding-top: 1%;
+    /* height: auto; */
 
 }
 img{
     border-radius: 50%;
-    /* height: 40px; */
+    height: 40px;
    
   }
-  img:hover{
+  /* img:hover{
       cursor: pointer;
-  }
+  } */
 .header{
     display: flex;
     /* margin-left: 1%; */
