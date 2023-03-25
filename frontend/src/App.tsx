@@ -12,6 +12,7 @@ function App() {
       <Route path='/chat/chatpage' element={<Chatpage />}></Route>
       <Route path="/auth-user-login" element={<Login />} />
       <Route path="/auth-user-register" element={<Register />} />
+      <Route ></Route>
     </Routes>
   )
 }

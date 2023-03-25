@@ -49,28 +49,32 @@ button{
 .wrap{
     margin-left: 20%;
 }
-img{
-  border-radius: 20px;
- 
-}
-img:hover{
-    cursor: pointer;
-}
-.image{
+
+.image img{
     padding-left: 5%;
-    padding-top: 2%;
+    /* padding-top: 1%; */
+    height: auto;
 
 }
+img{
+    border-radius: 50%;
+    /* height: 40px; */
+   
+  }
+  img:hover{
+      cursor: pointer;
+  }
 .header{
     display: flex;
     /* margin-left: 1%; */
+    height: 40px;
     background-color: green;
     width: 26vw;
     margin-bottom: 1%;
     border-radius: 10px;
 }
 .number{
-    padding-left: 5%;
+    padding-left: 8%;
     padding-top: 3%;
     color:blue;
 
@@ -106,3 +110,7 @@ background-color: whitesmoke;
 .message2:hover{
     background-color: whitesmoke;
     }
+/* 
+.profile-pic{
+    height: auto;
+} */
