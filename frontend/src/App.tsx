@@ -4,15 +4,16 @@ import Register from './components/auth/Register';
 import Home from './components/Home';
 import  Chatlist  from './components/chat/Chatlist';
 import Chatpage from './components/chat/Chatpage';
+import Talktous from './components/chat/Talktous';
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path='/chat' element={<Chatlist />}></Route>
-      <Route path='/chat/chatpage' element={<Chatpage />}></Route>
+      {/* <Route path='/chat' element={<Chatlist />}></Route>
+      <Route path='/chat/chatpage' element={<Chatpage />}></Route> */}
+      <Route path='/talktous' element={<Talktous />}></Route>
       <Route path="/auth-user-login" element={<Login />} />
       <Route path="/auth-user-register" element={<Register />} />
-      <Route ></Route>
     </Routes>
   )
 }
