@@ -1,19 +1,7 @@
 import React from 'react';
 import "./test.css";
-
-function displaychats(){
-  const chat = document.getElementById("chatimage");
-  var displays= chat.style.visibility;
-  var button=document.getElementById("image");
-  if(displays=="visible"){
-      chat.style.visibility='collapse';
-  }
- else{
-  chat.style.visibility='visible';
- }
-
-//  document.getElementById("chatimage") = "visible";
-}
+import "../../query/chat";
+import "./image.jpeg";
 
 const Chatlist = () => {
   return (
@@ -25,19 +13,7 @@ const Chatlist = () => {
       </div>
           <hr />
           <div className="chat" id="chat1"> <a href="chat.html">CHAT</a> </div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />  
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
-              <div className="chat">CHAT</div><hr />
+            {/* displaychats from the database */}
               <div className="chat">CHAT</div><hr />
               <div className="chat">CHAT</div><hr />
               <div className="chat">CHAT</div><hr />
@@ -49,13 +25,29 @@ const Chatlist = () => {
               <div className="chat">CHAT</div><hr />
       
   </div>
-  <button onClick={displaychats}>
-    <img src="image.jpeg" alt="" width="30px" height="30px" id="image" /> </button>
+  <button
+  //  onClick={displaychats}
+   >
+    <img src={'image.jpeg'} alt="" width="30px" height="30px" id="image" /> 
+    </button>
 
 
 
 </div>
   )
 }
+// function displaychats(){
+//   const chat = document.getElementById("chatimage");
+//   var displays= chat.style.visibility;
+//   var button=document.getElementById("image");
+//   if(displays=="visible"){
+//       chat.style.visibility='collapse';
+//   }
+//  else{
+//   chat.style.visibility='visible';
+//  }
 
-export default Chatlist
+//  document.getElementById("chatimage") = "visible";
+// }
+
+export default Chatlist;
