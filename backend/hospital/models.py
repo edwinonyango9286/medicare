@@ -1,20 +1,12 @@
 from django.db import models
-from location.models import SubCounty
 from uuid import uuid4
 
-class Hospital(models.Model):
-    location = models.ForeignKey(SubCounty,on_delete=models.CASCADE)
-    name = models.CharField(max_length=20,unique=True)
-
-    def __str__(self):
-        return self.name
-
 class Ward(models.Model):
-    hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE)
+    id = models.UUIDField(default=uuid4, primary_key=True)
     type = models.CharField(max_length=20,default="NORMAL")
     name = models.CharField(max_length=10,unique=True)
     capacity = models.IntegerField()
     occupancy = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.hospital} -> {self.name}"
+        return f"{self.name}"

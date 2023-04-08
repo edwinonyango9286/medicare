@@ -1,0 +1,16 @@
+html , body{
+  /* background: rgba(45, 89, 170, 0.767); */
+  margin: 0;
+}
+#row{
+  margin: 4%;
+  /* margin-right: 4%; */
+  /* align-items: center; */
+  justify-content: center;
+  
+
+}
+
+#btn-submit{
+  width: 100%;
+}

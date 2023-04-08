@@ -6,7 +6,7 @@ class County(models.Model):
 
     def __str__(self):
         return self.countyName
-    
+
     class Meta:
         ordering = ("countyName",)
 
@@ -17,6 +17,6 @@ class SubCounty(models.Model):
 
     def __str__(self):
         return f"{self.subcountyName}"
-    
+
     class Meta:
         ordering = ("county__countyName","subcountyName")

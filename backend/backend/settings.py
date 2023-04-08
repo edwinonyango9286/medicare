@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,11 +21,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'graphene_django',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'chat',
     'user',
     'location',
     'hospital',
+    'appointment',
+    'billing',
 ]
 
 X_FRAME_OPTIONS='SAMEORIGIN'
@@ -113,21 +117,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.User'
 
-GRAPHENE = {
-    "SCHEMA": "backend.schema.schema",
-    "MIDDLEWARE" : [
-        "graphql_jwt.middleware.JSONWebTokenMiddleware",
-    ]
-}
-
-AUTHENTICATION_BACKENDS = [
-    "graphql_jwt.backends.JSONWebTokenBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
-
 CORS_ORIGIN_WHITELIST = [
    "http://localhost:5173",
    "http://localhost:8080",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME' : timedelta(days=14),
+    'REFRESH_TOKEN_LIFETIME' : timedelta(days=14),
+    'ROTATE_REFRESH_TOKENS' : True
+}
 
 LOGOUT_REDIRECT_URL = '/admin/login'

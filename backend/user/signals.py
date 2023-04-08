@@ -13,7 +13,7 @@ def drop_user_staff(sender, instance, **kwargs):
     user.is_staff = False
     user.groups.clear()
     user.save()
-    
+
 @receiver(post_save, sender=HospitalStaff)
 def make_user_staff(sender, instance, **kwargs):
     user = User.objects.get(id=instance.staff.id)
@@ -21,18 +21,18 @@ def make_user_staff(sender, instance, **kwargs):
     user.is_staff = True
     user.groups.add(instance.proffesion.group)
     user.save()
-    
+
 @receiver(post_save, sender=InPatient)
 def update_inpatient(sender, instance, **kwargs):
     if instance.isActive:
         Ward.objects.filter(id=instance.ward.id).update(occupancy=F('occupancy')+1)
     elif not instance.isActive:
         Ward.objects.filter(id=instance.ward.id).update(occupancy=F('occupancy')-1)
-        
+
 @receiver(pre_save, sender=User)
 def capitalize_names(sender, instance, **kwargs):
     if instance.username:
         instance.username = instance.username.upper()
-        
-    if isinstance.gender:
+
+    if instance.gender:
         instance.gender = instance.gender.upper()

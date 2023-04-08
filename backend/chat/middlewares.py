@@ -1,29 +1,39 @@
 from urllib.parse import parse_qs
-from channels.db import database_sync_to_async
-from graphql_jwt.backends import get_user_by_token
-from graphql_jwt.exceptions import JSONWebTokenError
+from django.contrib.auth.models import AnonymousUser
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth import get_user_model
 
-@database_sync_to_async
-def get_user(scope):
-    from django.contrib.auth.models import AnonymousUser
-    if "token" not in scope:
-        raise ValueError("Cannot find token in scope. You should wrap your consumer in TokenAuthMiddleware.")
-    token = scope["token"]
-    user = None
+User = get_user_model()
+
+async def get_user(scope):
+    if "query_string" not in scope:
+        return AnonymousUser()
+    query_params = parse_qs(scope["query_string"].decode())
+    token = query_params.get("token", [None])[0]
+    if not token:
+        return AnonymousUser()
     try:
-        user = get_user_by_token(token)
-    except JSONWebTokenError:
-        pass
-    
-    return user or AnonymousUser()
+        decoded_token = AccessToken(token)
+        user = User.objects.get(id=decoded_token["user_id"])
+        return user
+    except (InvalidToken, TokenError, User.DoesNotExist):
+        return AnonymousUser()
 
 class TokenAuthMiddleware:
     def __init__(self, app):
         self.app = app
-        
+
     async def __call__(self, scope, receive, send):
         query_params = parse_qs(scope["query_string"].decode())
-        token = query_params["token"][0]
-        scope["token"] = token
-        scope["user"] = await get_user(scope)
+        token = query_params.get("token", [None])[0]
+        if not token:
+            scope["user"] = AnonymousUser()
+            return await self.app(scope, receive, send)
+        try:
+            decoded_token = AccessToken(token)
+            user = User.objects.get(id=decoded_token["user_id"])
+            scope["user"] = user
+        except (InvalidToken, TokenError, User.DoesNotExist):
+            scope["user"] = AnonymousUser()
         return await self.app(scope, receive, send)
