@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import "./talktous.css";
+import profile from "./image.jpeg";
 function Talktous() {
   const [showDiv, setShowDiv] = useState(false);
   const [showStartChat, setShowStartChat] = useState(false);
@@ -39,7 +40,7 @@ function Talktous() {
 
           <a className='informasi' title='Chat Whatsapp' onClick={startchat}>
             <div className='info-avatar'>
-              <img src='https://2.bp.blogspot.com/-y6xNA_8TpFo/XXWzkdYk0MI/AAAAAAAAA5s/RCzTBJ_FbMwVt5AEZKekwQqiDNqdNQJjgCLcBGAs/s70/supportmale.png' />
+              <img src={profile} />
             </div>
             <div className='info-chat'>
               <span className='chat-label'>Consult</span>
