@@ -27,16 +27,8 @@ const Appointment = () => {
 
    const SubmitForm = (event) => {
       event.preventDefault();
-
+      console.log(input);
    }
-   const [proceed, setProceed] = useState(false);
-   useEffect(() => {
-      if (IsAuthenticated()) {
-         navigate("/")
-      } else {
-         setProceed(true);
-      }
-   })
 
    return (
       <Base>
