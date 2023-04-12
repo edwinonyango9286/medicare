@@ -1,0 +1,34 @@
+#card{
+    width: 90vh;
+}
+#image-card{
+width: 33vw;
+height: 67vh;
+position: absolute;
+left: 80%;
+right: 20%;
+left: 1%;
+top: 1%;
+
+}
+#container-image{
+    width: 33vw;
+    height: 69vh;
+}
+#container-image img{
+    width: 39vw;
+    height: 67vh;
+    position: absolute;
+    right: 2%;
+    left: 1%;
+    top: 1%;
+    
+    }
+.bg-secondary{
+       /* background-color:#ff7a29; */
+       background-color: blue;
+    }
+#mpesa-icon{
+    height: 30px;
+    border-radius: 50%;
+}
