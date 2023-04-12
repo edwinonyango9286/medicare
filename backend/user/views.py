@@ -90,6 +90,33 @@ class UpdateProfile(APIView):
     def post(self, request):
         email = request.data.get("email")
         phoneNumber = request.data.get("phoneNumber")
+        response = {"success":True,"error":""}
+
+        user = User.objects.get(id=request.user.id)
+        
+        if "image" in request.FILES:
+            user.image = request.FILES["image"]
+        
+        if email:
+            try:
+                User.objects.get(email=email)
+                response["success"] = False
+                response["error"] = "The email provided is already registered to another user"
+
+            except User.DoesNotExist:
+                user.email = email
+            
+        if response["success"] and phoneNumber:
+            try:
+                User.objects.get(email=email)
+                response["success"] = False
+                response["error"] = "The phone number provided is already registered to another user"
+
+            except User.DoesNotExist:
+                user.phoneNumber = phoneNumber
+
+        user.save()
+        return Response(data=response)
 
 
 class ChangePassword(APIView):

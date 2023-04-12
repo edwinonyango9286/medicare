@@ -1,5 +1,5 @@
 from django.urls import path
-from user.views import ChangePassword, Login, Register,AllStaff,UserData,ViewUser,ChangePassword
+from user.views import ChangePassword, Login, Register,AllStaff,UserData,ViewUser,ChangePassword,UpdateProfile,DeleteAccount
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
@@ -9,4 +9,6 @@ urlpatterns = [
     path(route="profile/",view=UserData.as_view()),
     path(route="staff/all/",view=AllStaff.as_view()),
     path(route="change-password/",view=ChangePassword.as_view()),
+    path(route="update-profile/",view=UpdateProfile.as_view()),
+    path(route="delete-account/",view=DeleteAccount.as_view()),
 ]
