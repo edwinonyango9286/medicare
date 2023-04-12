@@ -1,6 +1,5 @@
 frontend/node_modules/
 venv
-myvenv
 .idea
 .vscode
 backend/myenv
