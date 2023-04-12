@@ -6,11 +6,14 @@ import Talktous from './components/chat/Talktous';
 import Profile from './components/auth/Profile';
 import Appointment from './components/appointment/Appointment';
 import Logout from './components/auth/Logout';
+import Billing_Insurance from './components/Billing_Insurance/Billing_Insurance';
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path='/talktous' element={<Talktous />}></Route>
+      <Route path='/pay' element={<Billing_Insurance />}></Route>
+
       <Route path="/auth-user-login" element={<Login />} />
       <Route path="/auth-user-register" element={<Register />} />
       <Route path="/user-profile" element={<Profile /> } />
