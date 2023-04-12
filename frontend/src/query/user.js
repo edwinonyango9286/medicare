@@ -55,7 +55,7 @@ class AUTH_BACKEND_REQUEST{
     }
 }
 
-export const BACKEND_URL = "http://localhost:8000/"
+export const BACKEND_URL = "http://localhost:8000/api/"
 
 export const session_id = Cookies.getItem("session_id")
 
@@ -72,10 +72,10 @@ export const user_register = (data) =>{
 
     return new BACKEND_REQUEST("user/register/",formData).post()
 
-    // return axios.post(
-    //     makeUrl("user/register/"),
-    //     formData
-    // )
+    return axios.post(
+        makeUrl("user/register/"),
+        formData
+    )
 }
 
 export const user_login = (data) =>{
@@ -96,7 +96,7 @@ export const user_profile = () =>{
         makeUrl("user/profile/"),
         {
             headers : {
-                'Authorization' : `Bearer ${session_id}`
+                'Authorization' : `Token ${session_id}`
             }
         }
     )

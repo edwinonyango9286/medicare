@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookies'
+import Cookies from 'js-cookies';
+import 'bulma/css/bulma.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import Talktous from './chat/Talktous';
@@ -37,12 +38,7 @@ const Base = ({ children }) => {
                                         <Link className="nav-link text-white" to="/user-profile">Profile</Link>
                                     </li>
                                     <li className="nav-item">
-                                        <Link className="nav-link text-white" to=""
-                                            onClick={() => {
-                                                UserLogout()
-                                                navigate("/auth-usser-login")
-                                            }}
-                                        >Logout</Link>
+                                        <Link className="nav-link text-white" to="/auth-user-logout">Logout</Link>
                                     </li>
                                 </React.Fragment> :
                                 <React.Fragment>

@@ -13,7 +13,6 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -22,8 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'rest_framework_simplejwt',
-    'chat',
+    'rest_framework.authtoken',
     'user',
     'location',
     'hospital',
@@ -62,16 +60,7 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = 'backend.asgi.application'
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
+WSGI_APPLICATION ='backend.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -118,20 +107,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.User'
 
 CORS_ORIGIN_WHITELIST = [
-   "http://localhost:5173",
-   "http://localhost:8080",
+    "http://localhost:5173",
+   "http://localhost:8000"
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
 }
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME' : timedelta(days=14),
-    'REFRESH_TOKEN_LIFETIME' : timedelta(days=14),
-    'ROTATE_REFRESH_TOKENS' : True
-}
 
 LOGOUT_REDIRECT_URL = '/admin/login'

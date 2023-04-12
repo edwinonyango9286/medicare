@@ -7,11 +7,12 @@ class Appointment(models.Model):
     id = models.UUIDField(default=uuid4, primary_key=True)
     patient =  models.ForeignKey(User, on_delete=models.CASCADE)
     doctor =  models.ForeignKey(HospitalStaff, on_delete=models.CASCADE)
+    appointmentDate = models.DateField()
     createdAt = models.DateTimeField(auto_now_add=True)
     isActive = models.BooleanField(default=True,verbose_name="is active")
 
     class Meta:
-        ordering = ("-isActive","-createdAt")
+        ordering = ("-isActive","-appointmentDate","-createdAt")
 
     def __str__(self) -> str:
         return "{}->{}".format(self.patient,self.doctor)
