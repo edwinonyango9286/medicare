@@ -3,4 +3,5 @@ venv
 .idea
 .vscode
 backend/myenv
+myenv
 frontend/src/tests
