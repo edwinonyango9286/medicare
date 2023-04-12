@@ -2,3 +2,5 @@ frontend/node_modules/
 venv
 .idea
 .vscode
+backend/myenv
+frontend/src/tests
