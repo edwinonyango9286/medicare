@@ -15,7 +15,7 @@ function Profile() {
 const [user, setUser] = useState({});
 
 const [activeDiv, setActiveDiv] = useState(1);
-const [error, setError] = useState('');
+const [error, setError] = useState(false);
 // Event handlers
 const LoadUser = () => {
   user_profile().then((response) => {
