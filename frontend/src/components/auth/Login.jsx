@@ -30,12 +30,11 @@ function Login() {
         } else {
             user_login(input)
                 .then(response => {
-                    if (response.data.error) {
-                        setError(response.data.error)
-                    } else {
-                        Cookies.setItem("session_id", response.data.access)
-                        Cookies.setItem("refresh_token", response.data.refresh)
+                    if (response.data.success) {
+                        Cookies.setItem("session_id", response.data.token)
                         navigate("/")
+                    } else {
+                        setError(response.data.error)
                     }
                 })
         }

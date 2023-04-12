@@ -12,25 +12,14 @@ import axios from 'axios';
 import Profilepic from "../../images/image.jpeg";
 
 function Profile() {
-    // State hooks
 const [user, setUser] = useState({});
-const [countyName, setCountyName] = useState('');
-const [locations, setLocations] = useState([]);
+
 const [activeDiv, setActiveDiv] = useState(1);
 const [error, setError] = useState('');
-const [gender, setGender] = useState('Male');
-const [maritalStatus, setMaritalStatus] = useState('');
-const [age, setAge] = useState('');
-const [country, setCountry] = useState('');
-const [address, setAddress] = useState('');
-
 // Event handlers
 const LoadUser = () => {
   user_profile().then((response) => {
     const user = response.data.user;
-    const countyName = user.location.county.countyName;
-    console.log(countyName);
-    setCountyName(countyName);
     setUser(user);
   });
 };
@@ -49,69 +38,15 @@ const getActiveClass = (divNumber) => {
   return activeDiv === divNumber ? 'active' : '';
 };
 
-const SubmitForm = (event) => {
-  event.preventDefault();
-  if (email.length === 0) {
-    alert('Please fill out all fields');
-  } else {
-    Book.mutate();
-  }
-};
-
-const handleChange = (event) => {
-  const { value } = event.target;
-  setMaritalStatus(value);
-  console.log('Selected value:', value);
-  // do something with the selected value
-};
-
-const handleSelectChange = (event) => {
-  setMaritalStatus(event.target.value);
-  console.log('Selected value:', event.target.value);
-  // do something with the selected value
-};
-
-const handleAgeChange = (event) => {
-  const { value } = event.target;
-  setAge(value);
-  console.log('Selected age range:', value);
-  // do something with the selected age range
-};
-
-const handleCountryChange = (event) => {
-  const { value } = event.target;
-  setCountry(value);
-  console.log('Selected country:', value);
-  // do something with the selected country
-};
-
-const handleAddressChange = (event) => {
-  setAddress(event.target.value);
-};
-
-const handleAddressBlur = () => {
-  console.log('Address field blurred');
-};
-
-const handleLocationChange = (event) => {
-  const subcountyCode = event.target.value;
-  const selectedSubcounty = locations.find(
-    (subcounty) => subcounty.subcountyCode === subcountyCode
-  );
-  // const selectedCounty = selectedSubcounty.county.countyName;
-  setLocation(subcountyCode);
-  setCounty(selectedCounty);
-};
+const SubmitForm = (event) =>{
+    event.preventDefault();
+}
 
 // useEffect hooks
 useEffect(() => {
   LoadLocations();
   LoadUser();
 }, []);
-
-useEffect(() => {
-  console.log(`Gender changed to ${gender}`);
-}, [gender]);
 
   return (
     <Base>
@@ -164,7 +99,7 @@ useEffect(() => {
                                   <div className="form-group row align-items-center">
                                      <div className="col-md-12">
                                         <div className="profile-img-edit">
-                                           <img className="profile-pic" src={Profilepic}   alt="profile-pic" />
+                                           <img className="profile-pic" src={"http://localhost:8000"+user?.image}   alt="profile-pic" />
                                            <div className="p-image">
                                              <i className="ri-pencil-line upload-button"></i>
                                              <input className="file-upload"  type="file" accept="image/*" />
@@ -174,105 +109,33 @@ useEffect(() => {
                                   </div>
                                   <div className=" row align-items-center">
                                      <div className="form-group col-sm-6">
-                                        <label htmlFor="fname">Full Name: {user?.username}</label>
-                                        <input type="text" className="form-control" id="fname"  placeholder={user?.username}/>
+                                        <label htmlFor="email">Email</label>
+                                        <input type="email" className="form-control" id="email"  placeholder={user?.email}/>
                                      </div>
                                      
                                      <div className="form-group col-sm-6">
-                                        <label htmlFor="uname">User Name: {user?.username}</label>
-                                        <input type="text" className="form-control" id="uname" placeholder={user?.username} />
+                                        <label htmlFor="username">Full Name</label>
+                                        <input type="text" className="form-control" id="username" value={user?.username} disabled/>
                                      </div>
+
+
                                      <div className="form-group col-sm-6">
-                                        <label htmlFor="cname">City:{countyName}</label><br />
-                                        <select 
-                                          value={location} 
-                                          onChange={handleLocationChange} 
-                                          className="form-control" 
-                                          id="exampleFormControlSelect1"
-                                          >
-                                          <option value="" >----------------------{}-------------------------</option>
-                                          {locations.map((subcounty, index) => (
-                                             <option key={index} value={subcounty?.subcountyCode}>{subcounty?.subcountyName}</option>
-                                          ))}
-                                          </select>
+                                        <label htmlFor="phoneNumber">Phone Number</label>
+                                        <input type="number" className="form-control" id="phoneNumber" placeholder={user?.phoneNumber} />
+                                     </div>
+
+                                     <div className="form-group col-sm-6">
+                                        <label htmlFor="cname">Location</label><br />
+                                        <input type="text" className="form-control" value={user?.location?.subcountyName+" , "+user?.location?.county.countyName} disabled/>
                                      </div>
                                      <div className="form-group col-sm-6">
                                        <label className="d-block">Gender:</label>
-                                       <div className="custom-control custom-radio custom-control-inline">
-                                       <input type="radio" id="customRadio6" name="customRadio1" className="custom-control-input"
-                                          value="Male" checked={gender === 'Male'} onChange={(e) => setGender(e.target.value)} />
-                                       <label className="custom-control-label" htmlFor="customRadio6"> Male </label>
-                                       </div>
-                                       <div className="custom-control custom-radio custom-control-inline">
-                                       <input type="radio" id="customRadio7" name="customRadio1" className="custom-control-input"
-                                          value="Female" checked={gender === 'Female'} onChange={(e) => setGender(e.target.value)} />
-                                       <label className="custom-control-label" htmlFor="customRadio7"> Female </label>
-                                       </div>
+                                        <input type="text" className="form-control" id="username" value={user?.gender} disabled/>
                                     </div>
                                     <div className="form-group col-sm-6">
-                                       <label htmlFor="dob">Date Of Birth: {user?.dateOfBirth}</label>
-                                       <input className="form-control" id="dob" type="date" max={new Date().toISOString().split("T")[0]} />
+                                       <label htmlFor="dob">Date Of Birth:</label>
+                                       <input className="form-control" id="dob" type="date" value={user?.dateOfBirth} disabled />
                                     </div>
-                                    <div className="form-group col-sm-6">
-                                       <label>Marital Status:</label>
-                                       <select
-                                       className="form-control"
-                                       id="exampleFormControlSelect1"
-                                       value={maritalStatus}
-                                       onChange={handleSelectChange}
-                                       onInput={handleChange}
-                                       >
-                                       <option>Single</option>
-                                       <option>Married</option>
-                                       <option>Widowed</option>
-                                       <option>Divorced</option>
-                                       <option>Separated</option>
-                                       </select>
-                                    </div>
-                                    <div className="form-group col-sm-6">
-                                       <label>Age Range</label>
-                                       <select
-                                          className="form-control"
-                                          id="exampleFormControlSelect2"
-                                          value={age}
-                                          onChange={handleAgeChange}
-                                          onInput={handleAgeChange}
-                                       >
-                                          <option>12-18</option>
-                                          <option>19-32</option>
-                                          <option>33-45</option>
-                                          <option>46-62</option>
-                                          <option>63 &gt; </option>
-                                       </select>
-                                       </div>
-                                       <div className="form-group col-sm-6">
-                                       <label>Country:</label>
-                                       <select
-                                          className="form-control"
-                                          id="exampleFormControlSelect3"
-                                          value={country}
-                                          onChange={handleCountryChange}
-                                          onInput={handleCountryChange}
-                                       >
-                                          <option>Kenya</option>
-                                          <option>Uganda</option>
-                                          <option>Tanzania</option>
-                                          <option>Cameroon</option>
-                                          <option>South Africa</option>
-                                       </select>
-                                       </div>
-                                       <div className="form-group col-sm-12">
-                                          <label>Address:</label>
-                                          <textarea
-                                          className="form-control"
-                                          name="address"
-                                          value={address}
-                                          onChange={handleAddressChange}
-                                          onBlur={handleAddressBlur}
-                                          >
-                                          Hello there! If you're from Kisumu, I'd like to extend a warm greeting to you. Kisumu is a beautiful city located in western Kenya, known for its stunning sunsets over Lake Victoria and vibrant culture. I hope you're doing well and enjoying all the wonderful things that Kisumu has to offer. Wishing you all the best!
-                                          </textarea>
-                                       </div>
                                   </div>
                                   <button type="submit" id="btn-submit" className="btn btn-primary ">Submit</button>
                                   {/*  */}
