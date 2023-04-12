@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from user.models import User, HospitalStaff, InPatient, InPatientReport, OutPatient, OutPatientReport
 from location.models import SubCounty
 from user.serializers import UserDataSerializer, HospitalStaffSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class Login(APIView):
@@ -63,6 +64,7 @@ class Register(APIView):
 
 
 class UserData(APIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserDataSerializer
 
     def get(self, request):
@@ -73,6 +75,7 @@ class UserData(APIView):
 
 
 class ViewUser(APIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserDataSerializer
 
     def get(self, response, user_id):
@@ -81,9 +84,93 @@ class ViewUser(APIView):
 
         return Response(data=response)
 
+class UpdateProfile(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        email = request.data.get("email")
+        phoneNumber = request.data.get("phoneNumber")
+        response = {"success":True,"error":""}
+
+        user = User.objects.get(id=request.user.id)
+        
+        if "image" in request.FILES:
+            user.image = request.FILES["image"]
+        
+        if email:
+            try:
+                User.objects.get(email=email)
+                response["success"] = False
+                response["error"] = "The email provided is already registered to another user"
+
+            except User.DoesNotExist:
+                user.email = email
+            
+        if response["success"] and phoneNumber:
+            try:
+                User.objects.get(email=email)
+                response["success"] = False
+                response["error"] = "The phone number provided is already registered to another user"
+
+            except User.DoesNotExist:
+                user.phoneNumber = phoneNumber
+
+        user.save()
+        return Response(data=response)
+
 
 class ChangePassword(APIView):
-    pass
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        current_pasword = request.data.get("current_password")
+        new_pasword = request.data.get("new_password")
+        confirm_pasword = request.data.get("confirm_password")
+        response = {"success":True,"error":""}
+
+        if authenticate(email=request.user.email,password=current_password):
+            if len(new_pasword) < 8:
+                response["success"] = False
+                response["error"] = "Password length should not be less than 8"
+
+            else:
+                if new_pasword != confirm_pasword:
+                    response["success"] = False
+                    response["error"] = "Your passwords do not match"
+
+                else:
+                    user = User.objects.get(id=request.user.id)
+                    user.set_password(new_pasword)
+                    user.save()
+
+        else:
+            response["success"] = False
+            response["error"] = "Invalid password provided"
+        
+        return Response(data=response)
+
+class DeleteAccount(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+        response = {"success":True,"error":""}
+
+        user = User.objects.filter(email=email)
+
+        if user:
+            if authenticate(request=request,email=email,password=password):
+                user.delete()
+            
+            else:
+                response["success"] = False
+                response["error"] = "Invalid email or password"
+
+        else:
+            response["success"] = False
+            response["error"] = "Invalid email or password"
+        
+        return Response(data=response)
 
 
 class AllStaff(APIView):
