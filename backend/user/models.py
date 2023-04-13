@@ -82,7 +82,7 @@ class HospitalStaff(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True,verbose_name="registered on")
 
     def __str__(self) -> str:
-        return "{}->{}->{}".format(self.staff, self.proffesion)
+        return "{}->{}".format(self.staff.username, self.proffesion.type)
 
     def  image(self):
         return mark_safe('<img src="/../../media/%s" width="70" height="70" />' % (self.staff.image))

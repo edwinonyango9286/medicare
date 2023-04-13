@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookies';
 import 'bulma/css/bulma.min.css';
@@ -6,12 +6,21 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import Talktous from './chat/Talktous';
 import { IsAuthenticated, UserLogout } from '../libs/user';
+import { user_profile } from '../query/user';
 
 const Base = ({ children }) => {
 
     const navigate = useNavigate()
+    const [user, setUser] = useState({})
+    const LoadUser = () => {
+        user_profile()
+            .then(response => {
+                setUser(response.data.user)
+            })
+    }
 
     useEffect(() => {
+        LoadUser()
         if (!IsAuthenticated()) {
             navigate("/auth-user-login")
         }
@@ -51,6 +60,17 @@ const Base = ({ children }) => {
                                 </React.Fragment>
                             }
                         </ul>
+                        {IsAuthenticated() && (
+                            <div className="navbar-end is-flex">
+                            <div className='d-flex flex-column'>
+                                <span>{user?.username}</span>
+                                <i>{user?.email}</i>
+                            </div>
+                                <div className="image" style={{maxWidth:"45px"}}>
+                                    <img src={"http://localhost:8000"+user?.image} alt="" className="mx-2 is-rounded" />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>

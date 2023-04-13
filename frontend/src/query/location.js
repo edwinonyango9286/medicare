@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { makeUrl } from './user'
+import { BACKEND_REQUEST } from './user'
 
 export const all_locations = () => {
-    return axios.get(
-        makeUrl("location/all/")
+    return BACKEND_REQUEST.get(
+        "location/all/"
     )
 }

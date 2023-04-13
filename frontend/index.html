@@ -5,6 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <style>
+      .link-card{
+        transition: all ease-in-out;
+        transition-duration: 500ms;
+        background-image: linear-gradient(to bottom right,#4c09c8,#2e227d);
+      }
+      .link-card:hover{
+        background-image: linear-gradient(to top left,#4c09c8,#2e227d);
+        transform: scale(105%);
+      }
+      .link-card p,.link-card i,.link-card span{
+        color: white;
+        font-size: 1.2rem;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

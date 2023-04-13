@@ -7,13 +7,23 @@ from appointment.serializers import AppointmentSerializer
 
 class MakeAppointment(APIView):
     def post(self, request):
-        appointment = Appointment.objects.create(
-            doctor = HospitalStaff.objects.get(id=request.data.get("doctor")),
-            patient = User.objects.get(id=request.user.id),
-            appointmentDate = request.data.get("appointmentDate")
-        )
+        response = {"success":True,"message":""}
+        try:
+            appointment = Appointment.objects.get(patient__id=request.user.id,isActive=True)
+            response["id"] = appointment.id
+            response["message"] = "Booking failed : You still have an active appoitment"
+        
+        except Appointment.DoesNotExist:
+            appointment = Appointment.objects.create(
+                description=request.data.get("description"),
+                doctor = HospitalStaff.objects.get(id=request.data.get("doctor")),
+                patient = User.objects.get(id=request.user.id),
+                appointmentDate = request.data.get("appointmentDate")
+            )
+            response["id"] = appointment.id
+            response["message"] = "Appointment added succesfully"
 
-        return Response(data={"appointmentId":appointment.id})
+        return Response(data=response)
 
 class ViewAppointments(APIView):
     serializer_class = AppointmentSerializer
@@ -35,8 +45,8 @@ class ViewAppointment(APIView):
 
 class CancelAppointment(APIView):
 
-    def post(self, request, pk):
-        response = {"success":True,"error":""}
+    def get(self, request, pk):
+        response = {"success":True,"message":""}
 
         try:
             appointment = Appointment.objects.get(id=pk,isActive=True)
@@ -45,6 +55,6 @@ class CancelAppointment(APIView):
 
         except Appointment.DoesNotExist:
             response["success"] = False
-            response["error"] = "The specified appointment does not exist"
+            response["message"] = "The specified appointment does not exist"
 
         return Response(data=response)

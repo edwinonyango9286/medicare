@@ -90,7 +90,8 @@ class UpdateProfile(APIView):
     def post(self, request):
         email = request.data.get("email")
         phoneNumber = request.data.get("phoneNumber")
-        response = {"success":True,"error":""}
+        response = {"success":True,"message":""}
+        print(email)
 
         user = User.objects.get(id=request.user.id)
         
@@ -101,19 +102,22 @@ class UpdateProfile(APIView):
             try:
                 User.objects.get(email=email)
                 response["success"] = False
-                response["error"] = "The email provided is already registered to another user"
+                response["message"] = "The email provided is already registered to another user"
 
             except User.DoesNotExist:
                 user.email = email
             
         if response["success"] and phoneNumber:
             try:
-                User.objects.get(email=email)
+                User.objects.get(phoneNumber==phoneNumber)
                 response["success"] = False
-                response["error"] = "The phone number provided is already registered to another user"
+                response["message"] = "The phone number provided is already registered to another user"
 
             except User.DoesNotExist:
                 user.phoneNumber = phoneNumber
+
+        if response["success"]:
+            response["message"] = "Profile updated succesfully"
 
         user.save()
         return Response(data=response)
@@ -123,29 +127,30 @@ class ChangePassword(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        current_pasword = request.data.get("current_password")
+        current_password = request.data.get("current_password")
         new_pasword = request.data.get("new_password")
         confirm_pasword = request.data.get("confirm_password")
-        response = {"success":True,"error":""}
+        response = {"success":True,"message":""}
 
         if authenticate(email=request.user.email,password=current_password):
             if len(new_pasword) < 8:
                 response["success"] = False
-                response["error"] = "Password length should not be less than 8"
+                response["message"] = "Password length should not be less than 8"
 
             else:
                 if new_pasword != confirm_pasword:
                     response["success"] = False
-                    response["error"] = "Your passwords do not match"
+                    response["message"] = "Your passwords do not match"
 
                 else:
                     user = User.objects.get(id=request.user.id)
                     user.set_password(new_pasword)
+                    response["message"] = "password updated succesfully"
                     user.save()
 
         else:
             response["success"] = False
-            response["error"] = "Invalid password provided"
+            response["message"] = "Invalid password provided"
         
         return Response(data=response)
 
@@ -178,6 +183,6 @@ class AllStaff(APIView):
 
     def get(self, request):
         response = {}
-        response["staff"] = self.serializer_class(HospitalStaff.objects.all(), many=True).data
+        response["doctors"] = self.serializer_class(HospitalStaff.objects.filter(staff__groups__name="doctors"), many=True).data
 
         return Response(data=response)

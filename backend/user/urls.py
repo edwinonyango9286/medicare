@@ -7,7 +7,7 @@ urlpatterns = [
     path(route="register/",view=Register.as_view()),
     path(route="<user_id>/view/",view=ViewUser.as_view()),
     path(route="profile/",view=UserData.as_view()),
-    path(route="staff/all/",view=AllStaff.as_view()),
+    path(route="doctors/all/",view=AllStaff.as_view()),
     path(route="change-password/",view=ChangePassword.as_view()),
     path(route="update-profile/",view=UpdateProfile.as_view()),
     path(route="delete-account/",view=DeleteAccount.as_view()),
