@@ -47,6 +47,9 @@ const Base = ({ children }) => {
                                         <Link className="nav-link text-white" to="/user-profile">Profile</Link>
                                     </li>
                                     <li className="nav-item">
+                                        <Link className="nav-link text-white" to="/pay">make payment</Link>
+                                    </li>
+                                    <li className="nav-item">
                                         <Link className="nav-link text-white" to="/auth-user-logout">Logout</Link>
                                     </li>
                                 </React.Fragment> :
