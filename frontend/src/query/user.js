@@ -8,13 +8,13 @@ export const session_id = Cookies.getItem("session_id")
 class BACKEND {
     constructor() {
       this.token = Cookies.hasItem("session_id") ? Cookies.getItem("session_id") : "";
-      this.axiosInstance = axios.create({
-        headers: {
-          Authorization: `Token ${this.token}`
-        }
-      });
 
+      this.axiosInstance = axios.create();
   
+      if(Cookies.hasItem("session_id")){
+        this.axiosInstance.defaults.headers.common["Authorization"] = `Token ${this.token}`;
+      }
+
       this.axiosInstance.interceptors.response.use(
         response => response,
         error => {
@@ -26,11 +26,11 @@ class BACKEND {
       );
     }
   
-    get(url, config = {}) {
+    get(url) {
       return this.axiosInstance.get(BACKEND_URL+url);
     }
   
-    post(url, data, config = {}) {
+    post(url, data) {
       return this.axiosInstance.post(BACKEND_URL+url, data);
     }
   }
@@ -43,7 +43,7 @@ export const user_register = (data) =>{
         formData.append(name,data[name])
     }
 
-    return new BACKEND_REQUEST.post(
+    return BACKEND_REQUEST.post(
         "user/register/",
         formData
     )

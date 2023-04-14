@@ -90,7 +90,7 @@ class UserAdmin(CurrentUserMixin, admin.ModelAdmin):
     list_filter = ("location__county","location","dateOfBirth")
 
     def get_form(self, request, obj, **kwargs):
-        exclude_fields = ['password','image']
+        exclude_fields = ['password',]
         if obj:
             if obj.id != request.user.id:
                 exclude_fields += ['nationalId']
