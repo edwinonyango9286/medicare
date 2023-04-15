@@ -1,0 +1,28 @@
+
+
+@media (max-width:990px) {
+    #collapsibleNavbar{
+        --bs-bg-opacity: 1;
+        background-color: rgba(var(--bs-primary-rgb),var(--bs-bg-opacity))!important;
+    
+    }	
+}
+
+@media (max-width:575px) {
+    #collapsibleNavbar{
+        --bs-bg-opacity: 1;
+        background-color: rgba(var(--bs-primary-rgb),var(--bs-bg-opacity))!important;
+    
+    }	
+    .navbar-end,li {
+        padding-left: 30px;
+        font-size: medium;
+        margin-top: -10px;
+    }
+    .image{
+        position:relative;
+        align-self: flex-end;
+        left:5px;
+
+    }
+}
