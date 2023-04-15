@@ -4,9 +4,12 @@ import Cookies from 'js-cookies';
 import 'bulma/css/bulma.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import '../assets/responsive_text_color.css'
 import Talktous from './chat/Talktous';
 import { IsAuthenticated, UserLogout } from '../libs/user';
 import { user_profile } from '../query/user';
+import alt_profile  from "../images/image.jpeg"
+
 
 const Base = ({ children }) => {
 
@@ -70,7 +73,7 @@ const Base = ({ children }) => {
                                 <i>{user?.email}</i>
                             </div>
                                 <div className="image" style={{maxWidth:"45px"}}>
-                                    <img src={"http://localhost:8000"+user?.image} alt="" className="mx-2 is-rounded" />
+                                    <img src={"http://localhost:8000"+user?.image} alt={alt_profile} className="mx-2 is-rounded" />
                                 </div>
                             </div>
                         )}

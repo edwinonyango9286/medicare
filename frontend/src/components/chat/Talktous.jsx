@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import "./talktous.css";
 import profile from "./image.jpeg";
+import { get_doctors } from "../../query/user";
+
 function Talktous() {
   const [showDiv, setShowDiv] = useState(false);
   const [showStartChat, setShowStartChat] = useState(false);
+
 
   const handlefirstClick = () => {
     setShowDiv(!showDiv);
@@ -21,6 +24,17 @@ function Talktous() {
     setShowStartChat(true);
   };
 
+  const [doctors_list,setDoctors] = useState([])
+   const LoadDoctorslist = () =>{
+      get_doctors()
+      .then(response => {
+         setDoctors(response.data.doctors)
+      })
+   }
+
+   useEffect(() => {
+    LoadDoctorslist()
+ },[])
   return (
     <>
 
